@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Supercharge Data Security with Copilot - Microsoft Event</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <!-- External CSS link -->
+    <link href="css/styles.css" rel="stylesheet"/>
+</head>
+<body>
+    <!-- Microsoft global header (navigation bar) -->
+    <header class="global-header">
+        <nav class="header-nav">
+            <div class="header-logo">
+                <a href="https://www.microsoft.com">
+                    <span class="logo-text">Microsoft</span>
+                </a>
+            </div>
+            <ul class="header-menu">
+                <li><a href="#products">Products</a></li>
+                <li><a href="#solutions">Solutions</a></li>
+                <li><a href="#resources">Resources</a></li>
+                <li><a href="#events">Events</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Event Content -->
+    <main>
+        <section class="event-hero">
+            <!-- Left column: Event details -->
+            <div class="event-info">
+                <span class="event-format">Digital</span>
+                <h1 class="event-title">Supercharge Data Security & Compliance with Security Copilot in Microsoft Purview</h1>
+                <p class="event-location"><strong>Where:</strong> Online</p>
+                <p class="event-datetime"><strong>When:</strong> Tuesday, August 12, 2025, 12:00 - 1:00 PM (GMT+08:00)</p>
+                <p class="event-timezone">*Localized times:* Singapore - 12:00 PM SGT; Sydney - 2:00 PM AEST; Mumbai - 9:30 AM IST</p>
+                <p class="event-language"><strong>Delivery language:</strong> English</p>
+                <p class="event-caption"><strong>Closed captioning:</strong> English</p>
+                <p class="event-description">
+                    As organizations embrace generative AI, the stakes for data security and compliance have never been higher.
+                    Join us for an exclusive briefing to explore how Microsoft is transforming data security and compliance teams' experience
+                    with the power of Copilot for Security – natively integrated into Microsoft Purview.
+                </p>
+            </div>
+
+            <!-- Right column: Registration form -->
+            <div class="registration-form">
+                <h2>Register Now</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input id="firstName" name="firstName" type="text" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input id="lastName" name="lastName" type="text" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input id="email" name="email" type="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <div class="phone-input">
+                            <!-- Country code dropdown -->
+                            <select name="phoneCountry" id="phoneCountry" required>
+                                <option value="+1">+1 (US)</option>
+                                <option value="+44">+44 (UK)</option>
+                                <option value="+65">+65 (SG)</option>
+                                <option value="+61">+61 (AU)</option>
+                                <option value="+91">+91 (IN)</option>
+                                <option value="+86">+86 (CN)</option>
+                                <option value="+81">+81 (JP)</option>
+                                <option value="+49">+49 (DE)</option>
+                                <option value="+33">+33 (FR)</option>
+                                <option value="+39">+39 (IT)</option>
+                            </select>
+                            <input id="phoneNumber" name="phoneNumber" type="tel" required placeholder="Phone Number">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="jobRole">Job Role</label>
+                        <input id="jobRole" name="jobRole" type="text" placeholder="e.g. IT Administrator">
+                    </div>
+                    <div class="form-group">
+                        <label for="company">Company Name</label>
+                        <input id="company" name="company" type="text" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country/Region</label>
+                        <select id="country" name="country" required>
+                            <option value="">-- Select Country --</option>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                            <option value="SG">Singapore</option>
+                            <option value="AU">Australia</option>
+                            <option value="IN">India</option>
+                            <option value="GB">United Kingdom</option>
+                            <option value="DE">Germany</option>
+                            <option value="FR">France</option>
+                            <option value="IT">Italy</option>
+                            <option value="JP">Japan</option>
+                            <option value="CN">China</option>
+                            <option value="BR">Brazil</option>
+                            <option value="MX">Mexico</option>
+                            <option value="ES">Spain</option>
+                            <option value="NL">Netherlands</option>
+                            <option value="SE">Sweden</option>
+                            <option value="NO">Norway</option>
+                            <option value="DK">Denmark</option>
+                            <option value="FI">Finland</option>
+                            <option value="PL">Poland</option>
+                            <option value="BE">Belgium</option>
+                        </select>
+                    </div>
+                    <!-- Privacy consent and submit -->
+                    <div class="form-group checkbox-group">
+                        <input id="acceptTerms" name="acceptTerms" type="checkbox" required>
+                        <label for="acceptTerms">I agree to the Microsoft Privacy Statement</label>
+                    </div>
+                    <button type="submit" id="registerButton">Register</button>
+                    <div id="formMessage" class="form-message"></div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Microsoft global footer -->
+    <footer class="global-footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h3>What's new</h3>
+                    <ul>
+                        <li><a href="#">Surface Pro 9</a></li>
+                        <li><a href="#">Surface Laptop 5</a></li>
+                        <li><a href="#">Surface Studio 2+</a></li>
+                        <li><a href="#">Microsoft 365</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Microsoft Store</h3>
+                    <ul>
+                        <li><a href="#">Account profile</a></li>
+                        <li><a href="#">Download Center</a></li>
+                        <li><a href="#">Returns</a></li>
+                        <li><a href="#">Order tracking</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Education</h3>
+                    <ul>
+                        <li><a href="#">Microsoft in education</a></li>
+                        <li><a href="#">Devices for education</a></li>
+                        <li><a href="#">Microsoft Teams for Education</a></li>
+                        <li><a href="#">Microsoft 365 Education</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Enterprise</h3>
+                    <ul>
+                        <li><a href="#">Azure</a></li>
+                        <li><a href="#">AppSource</a></li>
+                        <li><a href="#">Automotive</a></li>
+                        <li><a href="#">Government</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Microsoft. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/scripts.js"></script>
+</body>
+</html>
+

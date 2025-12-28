@@ -1,0 +1,342 @@
+/* Container and layout */
+.event-hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    background: url("../images/event-banner.jpg") center/cover no-repeat;
+    padding: 2rem;
+    gap: 2rem;
+    min-height: 600px;
+}
+
+.event-info, .registration-form {
+    background: rgba(255, 255, 255, 0.95); /* light overlay to ensure text legibility over image */
+    padding: 1.5rem;
+    border-radius: 4px;
+    flex: 1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* To make the left column larger than right, one could adjust flex ratios if needed */
+.event-info {
+    flex: 2;
+}
+
+.registration-form {
+    flex: 1;
+}
+
+/* Typography */
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #1b1b1b;
+    margin: 0;
+    background: #f8f8f8;
+}
+
+.event-title {
+    font-size: 1.5rem;
+    margin: 0.5rem 0;
+    color: #1b1b1b;
+    line-height: 1.3;
+}
+
+.event-format {
+    display: inline-block;
+    font-size: 0.9rem;
+    font-weight: bold;
+    padding: 0.2em 0.5em;
+    background: #f3f2f1; /* light gray pill for "Digital"/"In-person" label */
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    color: #323130;
+}
+
+.event-location, .event-datetime, .event-language, .event-caption, .event-description {
+    margin: 0.25rem 0;
+    line-height: 1.6;
+}
+
+.event-description {
+    margin-top: 1rem;
+    color: #323130;
+}
+
+.event-timezone {
+    font-size: 0.9rem;
+    color: #605e5c;
+    font-style: italic;
+}
+
+/* Form styles */
+.registration-form h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: #1b1b1b;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    color: #323130;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.5rem;
+    font: inherit;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+    font-size: 0.95rem;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #0078D4;
+    box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+}
+
+.phone-input {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.phone-input select {
+    max-width: 40%;
+    margin-right: 0;
+}
+
+.phone-input input {
+    flex: 1;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: auto;
+    margin-top: 0.2rem;
+    cursor: pointer;
+}
+
+.checkbox-group label {
+    font-weight: normal;
+    margin-bottom: 0;
+    cursor: pointer;
+}
+
+button#registerButton {
+    background: #0078D4; /* Microsoft blue */
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    width: 100%;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+
+button#registerButton:hover {
+    background: #005EA6;
+}
+
+button#registerButton:active {
+    background: #004578;
+}
+
+button#registerButton:disabled {
+    background: #c8c6c4;
+    cursor: not-allowed;
+}
+
+.form-message {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 3px;
+    display: none;
+}
+
+.form-message.success {
+    display: block;
+    background: #dff6dd;
+    color: #107c10;
+    border: 1px solid #107c10;
+}
+
+.form-message.error {
+    display: block;
+    background: #fde7e9;
+    color: #d13438;
+    border: 1px solid #d13438;
+}
+
+/* Global Header Styles */
+.global-header {
+    background: #fff;
+    border-bottom: 1px solid #e1dfdd;
+    padding: 0.75rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.header-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.header-logo a {
+    text-decoration: none;
+    color: #0078D4;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.header-menu {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 2rem;
+}
+
+.header-menu li a {
+    text-decoration: none;
+    color: #323130;
+    font-size: 0.95rem;
+    transition: color 0.2s ease;
+}
+
+.header-menu li a:hover {
+    color: #0078D4;
+}
+
+/* Global Footer Styles */
+.global-footer {
+    background: #f3f2f1;
+    border-top: 1px solid #e1dfdd;
+    padding: 2rem;
+    margin-top: 3rem;
+}
+
+.footer-content {
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.footer-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.footer-column h3 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    color: #323130;
+}
+
+.footer-column ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-column ul li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-column ul li a {
+    text-decoration: none;
+    color: #605e5c;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+}
+
+.footer-column ul li a:hover {
+    color: #0078D4;
+}
+
+.footer-bottom {
+    border-top: 1px solid #e1dfdd;
+    padding-top: 1rem;
+    text-align: center;
+}
+
+.footer-bottom p {
+    margin: 0;
+    color: #605e5c;
+    font-size: 0.85rem;
+}
+
+/* Responsive adjustments for narrower screens */
+@media (max-width: 768px) {
+    .event-hero {
+        flex-direction: column;
+        padding: 1rem;
+        min-height: auto;
+    }
+
+    .event-info, .registration-form {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    .header-nav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .header-menu {
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .footer-links {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .event-title {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .event-hero {
+        padding: 0.75rem;
+    }
+
+    .event-info, .registration-form {
+        padding: 1rem;
+    }
+
+    .phone-input {
+        flex-direction: column;
+    }
+
+    .phone-input select {
+        max-width: 100%;
+    }
+}
+
