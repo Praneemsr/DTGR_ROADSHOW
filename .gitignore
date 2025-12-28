@@ -1,38 +1,27 @@
-# Operating System Files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-Desktop.ini
+# Dependencies
+node_modules/
 
-# Editor directories and files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.project
-.classpath
-.settings/
+# Database
+database/
+*.db
+*.sqlite
+*.sqlite3
+
+# CSV exports
+registrations_*.csv
 
 # Logs
 *.log
 npm-debug.log*
 
-# Temporary files
-*.tmp
-*.temp
-*.bak
-*.cache
+# Environment variables
+.env
+.env.local
 
-# Microsoft Office temporary files
-~$*.docx
-~$*.doc
-~$*.xlsx
-~$*.xls
-~$*.pptx
-~$*.ppt
+# OS files
+.DS_Store
+Thumbs.db
 
+# IDE
+.vscode/
+.idea/

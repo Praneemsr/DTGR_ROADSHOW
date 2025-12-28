@@ -53,12 +53,8 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         try {
-            // In a real implementation, you would send this to your backend API
-            // For demonstration, we'll simulate an API call
-            
-            // Uncomment and modify the following to connect to your actual API:
-            /*
-            const response = await fetch('https://your-api-endpoint.com/api/events/register', {
+            // Send registration data to backend API
+            const response = await fetch('http://localhost:3000/api/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -66,19 +62,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify(submissionData)
             });
 
+            const result = await response.json();
+
             if (!response.ok) {
-                throw new Error('Registration failed. Please try again.');
+                throw new Error(result.message || 'Registration failed. Please try again.');
             }
 
-            const result = await response.json();
-            */
-
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // For demo purposes, we'll just show a success message
-            // In production, replace this with actual API call above
-            console.log('Form data to be submitted:', submissionData);
+            console.log('Registration successful:', result);
             
             showMessage('Thank you! Your registration has been received. You will receive a confirmation email shortly.', 'success');
             

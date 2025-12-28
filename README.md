@@ -10,9 +10,16 @@ This project recreates a Microsoft-style event registration page based on the st
 ├── css/
 │   └── styles.css      # All styling including layout, typography, and responsive design
 ├── js/
-│   └── scripts.js    # Form handling and submission logic
+│   └── scripts.js      # Form handling and submission logic
 ├── images/
 │   └── event-banner.jpg  # Background banner image for event hero section (placeholder needed)
+├── database/
+│   └── registrations.db  # SQLite database (created automatically)
+├── server.js          # Express server with API endpoints
+├── init-db.js         # Database initialization script
+├── export-csv.js      # CSV export script (runs locally)
+├── package.json       # Node.js dependencies and scripts
+├── .gitignore         # Git ignore file
 └── README.md          # This file
 ```
 
@@ -36,6 +43,80 @@ If you don't have an image yet, the page will still work but the background will
 - **Form Validation**: Client-side validation for all required fields
 - **Modern UI**: Clean, Microsoft-style design with Fluent UI principles
 - **Accessibility**: Proper labels, form structure, and keyboard navigation support
+- **Database Storage**: SQLite database to store all registrations
+- **CSV Export**: Export all registrations to CSV file locally
+
+## Database Setup and Usage
+
+This project uses SQLite (the easiest database solution) to store registrations locally.
+
+### Prerequisites
+
+1. **Install Node.js** (if not already installed):
+   - Download from: https://nodejs.org/
+   - Install the LTS version
+   - Verify installation: Open PowerShell and run `node --version`
+
+### Installation Steps
+
+1. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
+
+2. **Initialize Database** (optional - database auto-creates on first server start):
+   ```bash
+   npm run init-db
+   ```
+
+3. **Start the Server**:
+   ```bash
+   npm start
+   ```
+
+   The server will run on `http://localhost:3000`
+
+4. **Open the Event Page**:
+   - Open `http://localhost:3000` in your browser
+   - The registration form will now save data to the SQLite database
+
+### Exporting Registrations to CSV
+
+To export all registered attendees to a CSV file **locally** (not on the website):
+
+1. **Make sure the server is running** (or has been run at least once to create the database)
+
+2. **Run the export script**:
+   ```bash
+   npm run export-csv
+   ```
+
+3. **Find the CSV file**:
+   - The CSV file will be created in the project root directory
+   - Filename format: `registrations_YYYY-MM-DDTHH-MM-SS.csv`
+   - Example: `registrations_2025-12-28T17-30-45.csv`
+
+4. **Open the CSV**:
+   - Open the CSV file in Excel, Google Sheets, or any spreadsheet application
+   - The file contains: ID, First Name, Last Name, Email, Phone Country, Phone Number, Full Phone, Job Role, Company, Country, Registration Date
+
+### Database Location
+
+- Database file: `database/registrations.db`
+- Created automatically when the server starts
+- Stored locally on your computer (not on the website)
+
+### Available NPM Scripts
+
+- `npm start` - Start the server (runs on port 3000)
+- `npm run init-db` - Initialize/create the database
+- `npm run export-csv` - Export all registrations to CSV file
+
+### API Endpoints
+
+- `POST /api/register` - Register a new attendee
+- `GET /api/registrations` - Get all registrations (for testing)
+- `GET /api/health` - Health check endpoint
 
 ## Customization
 
@@ -58,13 +139,9 @@ Edit `css/styles.css` to customize:
 
 ### Connecting to Backend API
 
-To connect the form to your actual backend:
+The form is already connected to the local backend API. The frontend sends data to `http://localhost:3000/api/register`.
 
-1. Open `js/scripts.js`
-2. Find the commented section around line 50-60
-3. Uncomment the fetch API call
-4. Replace `'https://your-api-endpoint.com/api/events/register'` with your actual API endpoint
-5. Adjust the request body structure if needed to match your API requirements
+**Note**: Make sure the server is running (`npm start`) before submitting the form, otherwise you'll get a connection error.
 
 ## Browser Support
 
