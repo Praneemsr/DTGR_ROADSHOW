@@ -2,25 +2,53 @@
 
 This project recreates a Microsoft-style event registration page based on the structure analysis document.
 
+## 🚀 Quick Start (Choose Your Method)
+
+### Option 1: Docker (Recommended - No Node.js Installation Needed!)
+
+1. **Install Docker Desktop**: https://www.docker.com/products/docker-desktop/
+2. **Double-click `START_DOCKER.bat`** - This will:
+   - Build the Docker container
+   - Start the server automatically
+3. **Open** http://localhost:3000 in your browser
+4. **To export CSV**: Double-click `EXPORT_CSV_DOCKER.bat`
+
+**That's it!** No Node.js installation required!
+
+---
+
+### Option 2: Local Node.js Installation
+
+1. **Install Node.js** (if not installed): https://nodejs.org/ (download LTS version)
+2. **Double-click `START_SERVER.bat`** - This will:
+   - Install dependencies automatically
+   - Create the database
+   - Start the server
+3. **Open** http://localhost:3000 in your browser
+4. **To export CSV**: Double-click `EXPORT_CSV.bat`
+
 ## File Structure
 
 ```
 /project-root
-├── index.html          # Main HTML file with event page structure
+├── index.html          # Main event registration page
+├── admin.html          # Admin dashboard to view database
 ├── css/
-│   └── styles.css      # All styling including layout, typography, and responsive design
+│   └── styles.css      # Styling and responsive design
 ├── js/
-│   └── scripts.js      # Form handling and submission logic
-├── images/
-│   └── event-banner.jpg  # Background banner image for event hero section (placeholder needed)
+│   └── scripts.js      # Form handling and API calls
+├── images/             # Banner images (add event-banner.jpg)
 ├── database/
-│   └── registrations.db  # SQLite database (created automatically)
+│   └── registrations.db  # SQLite database (auto-created)
 ├── server.js          # Express server with API endpoints
-├── init-db.js         # Database initialization script
-├── export-csv.js      # CSV export script (runs locally)
-├── package.json       # Node.js dependencies and scripts
-├── .gitignore         # Git ignore file
-└── README.md          # This file
+├── init-db.js         # Database initialization
+├── export-csv.js      # CSV export script
+├── check-database.js  # Database verification tool
+├── package.json       # Dependencies and scripts
+├── START_SERVER.bat   # Start server (Windows)
+├── START_DOCKER.bat   # Start with Docker (Windows)
+├── EXPORT_CSV.bat     # Export CSV (Windows)
+└── README.md          # Documentation
 ```
 
 ## Image Assets Required
@@ -111,12 +139,43 @@ To export all registered attendees to a CSV file **locally** (not on the website
 - `npm start` - Start the server (runs on port 3000)
 - `npm run init-db` - Initialize/create the database
 - `npm run export-csv` - Export all registrations to CSV file
+- `npm run check-db` - Verify database structure and view statistics
 
 ### API Endpoints
 
 - `POST /api/register` - Register a new attendee
-- `GET /api/registrations` - Get all registrations (for testing)
+- `GET /api/registrations` - Get all registrations
 - `GET /api/health` - Health check endpoint
+- `GET /api/export-csv` - Trigger CSV export
+
+### Admin Dashboard
+
+**View database tables in your browser:**
+
+- **URL**: http://localhost:3000/admin
+- View all registrations in a clean table
+- Search and filter registrations
+- Export to CSV with one click
+- See real-time statistics
+- Auto-refreshes every 30 seconds
+
+### Database Schema
+
+**Table: `registrations`**
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INTEGER | Primary key, auto-increment |
+| first_name | TEXT | Required |
+| last_name | TEXT | Required |
+| email | TEXT | Required, unique |
+| phone_country | TEXT | Country code (e.g., +1) |
+| phone_number | TEXT | Phone number |
+| full_phone | TEXT | Complete phone number |
+| job_role | TEXT | Job title/role |
+| company | TEXT | Required |
+| country | TEXT | Required (country code) |
+| created_at | DATETIME | Auto-generated timestamp |
 
 ## Customization
 
@@ -159,9 +218,10 @@ The form is already connected to the local backend API. The frontend sends data 
 
 ## Notes
 
-- The form currently shows a success message on submission (demo mode)
-- To actually save registrations, you'll need to connect it to a backend API
-- All form fields match the expected structure from the analysis document
+- All registrations are automatically saved to the SQLite database
+- Database file: `database/registrations.db` (created automatically)
+- Use the admin dashboard at `/admin` to view all registrations
+- CSV exports are saved locally in the project folder
 - The page includes a simplified Microsoft-style header and footer for branding consistency
 
 ---

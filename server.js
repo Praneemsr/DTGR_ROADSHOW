@@ -1,5 +1,5 @@
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
+const initSqlJs = require('sql.js');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
@@ -19,12 +19,25 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname)); // Serve static files (HTML, CSS, JS)
 
-// Initialize database connection
-const db = new sqlite3.Database(DB_PATH, (err) => {
-    if (err) {
-        console.error('Error opening database:', err.message);
-    } else {
-        console.log('Connected to SQLite database');
+// Initialize database
+let db;
+let SQL;
+
+(async () => {
+    try {
+        SQL = await initSqlJs();
+        
+        // Load existing database or create new one
+        let buffer;
+        if (fs.existsSync(DB_PATH)) {
+            buffer = fs.readFileSync(DB_PATH);
+            db = new SQL.Database(buffer);
+            console.log('Loaded existing database');
+        } else {
+            db = new SQL.Database();
+            console.log('Created new database');
+        }
+        
         // Create table if it doesn't exist
         db.run(`CREATE TABLE IF NOT EXISTS registrations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,15 +51,29 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
             company TEXT NOT NULL,
             country TEXT NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`, (err) => {
-            if (err) {
-                console.error('Error creating table:', err.message);
-            } else {
-                console.log('Database table ready');
-            }
-        });
+        )`);
+        
+        // Save database to file
+        const data = db.export();
+        fs.writeFileSync(DB_PATH, Buffer.from(data));
+        
+        console.log('Database table ready');
+        console.log(`Database location: ${DB_PATH}`);
+    } catch (err) {
+        console.error('Error initializing database:', err.message);
+        process.exit(1);
     }
-});
+})();
+
+// Helper function to save database
+function saveDatabase() {
+    try {
+        const data = db.export();
+        fs.writeFileSync(DB_PATH, Buffer.from(data));
+    } catch (err) {
+        console.error('Error saving database:', err.message);
+    }
+}
 
 // API Route: Register new attendee
 app.post('/api/register', (req, res) => {
@@ -78,55 +105,61 @@ app.post('/api/register', (req, res) => {
         (first_name, last_name, email, phone_country, phone_number, full_phone, job_role, company, country)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-    db.run(sql, [
-        me_firstname,
-        me_lastname,
-        me_email,
-        phoneCountry,
-        phoneNumber,
-        me_phonenumber || '',
-        jobRole || '',
-        me_companyname,
-        me_country
-    ], function(err) {
-        if (err) {
-            if (err.message.includes('UNIQUE constraint failed')) {
-                return res.status(409).json({
-                    success: false,
-                    message: 'This email is already registered'
-                });
-            }
-            console.error('Database error:', err);
-            return res.status(500).json({
-                success: false,
-                message: 'Database error occurred'
-            });
-        }
-
+    try {
+        const stmt = db.prepare(sql);
+        stmt.bind([me_firstname, me_lastname, me_email, phoneCountry, phoneNumber, me_phonenumber || '', jobRole || '', me_companyname, me_country]);
+        stmt.step();
+        const id = db.exec("SELECT last_insert_rowid() as id")[0].values[0][0];
+        stmt.free();
+        
+        // Save database
+        saveDatabase();
+        
         res.json({
             success: true,
             message: 'Registration successful',
-            id: this.lastID
+            id: id
         });
-    });
+    } catch (err) {
+        if (err.message.includes('UNIQUE constraint failed') || err.message.includes('UNIQUE')) {
+            return res.status(409).json({
+                success: false,
+                message: 'This email is already registered'
+            });
+        }
+        console.error('Database error:', err);
+        return res.status(500).json({
+            success: false,
+            message: 'Database error occurred'
+        });
+    }
 });
 
 // API Route: Get all registrations (for admin/testing purposes)
 app.get('/api/registrations', (req, res) => {
-    db.all('SELECT * FROM registrations ORDER BY created_at DESC', (err, rows) => {
-        if (err) {
-            console.error('Database error:', err);
-            return res.status(500).json({
-                success: false,
-                message: 'Error fetching registrations'
+    try {
+        const result = db.exec('SELECT * FROM registrations ORDER BY created_at DESC');
+        const rows = result.length > 0 ? result[0].values.map(row => {
+            const cols = result[0].columns;
+            const obj = {};
+            cols.forEach((col, i) => {
+                obj[col] = row[i];
             });
-        }
+            return obj;
+        }) : [];
+        
         res.json({
             success: true,
             count: rows.length,
             data: rows
         });
-    });
+    } catch (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({
+            success: false,
+            message: 'Error fetching registrations'
+        });
+    }
 });
 
 // Health check endpoint
@@ -134,22 +167,56 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', message: 'Server is running' });
 });
 
+// Admin page route
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+// CSV Export endpoint (triggers export script)
+app.get('/api/export-csv', (req, res) => {
+    const { exec } = require('child_process');
+    const path = require('path');
+    
+    exec('npm run export-csv', { cwd: __dirname }, (error, stdout, stderr) => {
+        if (error) {
+            console.error('Export error:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Error exporting CSV: ' + error.message
+            });
+        }
+        
+        // Extract filename from output
+        const match = stdout.match(/File: (.+)/);
+        const filename = match ? match[1] : 'unknown';
+        
+        res.json({
+            success: true,
+            message: 'CSV exported successfully',
+            filename: filename,
+            output: stdout
+        });
+    });
+});
+
 // Start server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
-    console.log(`Database location: ${DB_PATH}`);
+    console.log(`\n📊 Admin Dashboard: http://localhost:${PORT}/admin`);
+    console.log(`📝 Event Registration: http://localhost:${PORT}`);
     console.log(`\nTo export registrations to CSV, run: npm run export-csv`);
 });
 
 // Graceful shutdown
 process.on('SIGINT', () => {
-    db.close((err) => {
-        if (err) {
-            console.error('Error closing database:', err.message);
-        } else {
-            console.log('Database connection closed');
+    try {
+        if (db) {
+            saveDatabase();
+            db.close();
+            console.log('Database saved and closed');
         }
-        process.exit(0);
-    });
+    } catch (err) {
+        console.error('Error closing database:', err.message);
+    }
+    process.exit(0);
 });
-

@@ -6,14 +6,15 @@
   "scripts": {
     "start": "node server.js",
     "init-db": "node init-db.js",
-    "export-csv": "node export-csv.js"
+    "export-csv": "node export-csv.js",
+    "check-db": "node check-database.js"
   },
   "keywords": ["event", "registration", "microsoft"],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.2",
-    "sqlite3": "^5.1.6",
+    "sql.js": "^1.12.0",
     "cors": "^2.8.5"
   }
 }

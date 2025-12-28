@@ -1,0 +1,17 @@
+node_modules
+database/*.db
+database/*.sqlite
+database/*.sqlite3
+registrations_*.csv
+*.log
+npm-debug.log*
+.env
+.env.local
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+*.md
+.git
+.gitignore
+

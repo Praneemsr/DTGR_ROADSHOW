@@ -2,10 +2,10 @@
 node_modules/
 
 # Database
-database/
-*.db
-*.sqlite
-*.sqlite3
+database/*.db
+database/*.sqlite
+database/*.sqlite3
+!database/.gitkeep
 
 # CSV exports
 registrations_*.csv

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Registration Admin - Database Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f3f2f1;
+            padding: 2rem;
+            color: #323130;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+
+        h1 {
+            color: #0078D4;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #605e5c;
+            margin-bottom: 2rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #f3f2f1;
+            padding: 1rem;
+            border-radius: 4px;
+            border-left: 4px solid #0078D4;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #605e5c;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #323130;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #0078D4;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #005EA6;
+        }
+
+        button.secondary {
+            background: #605e5c;
+        }
+
+        button.secondary:hover {
+            background: #323130;
+        }
+
+        button.success {
+            background: #107c10;
+        }
+
+        button.success:hover {
+            background: #0b5a0b;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.6rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: #f3f2f1;
+            position: sticky;
+            top: 0;
+        }
+
+        th {
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #323130;
+            border-bottom: 2px solid #e1dfdd;
+        }
+
+        td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e1dfdd;
+        }
+
+        tr:hover {
+            background: #faf9f8;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #605e5c;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #605e5c;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .message.success {
+            background: #dff6dd;
+            color: #107c10;
+            border: 1px solid #107c10;
+            display: block;
+        }
+
+        .message.error {
+            background: #fde7e9;
+            color: #d13438;
+            border: 1px solid #d13438;
+            display: block;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge.new {
+            background: #dff6dd;
+            color: #107c10;
+        }
+
+        .export-info {
+            background: #fff4e5;
+            border: 1px solid #ffaa44;
+            border-radius: 4px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            color: #323130;
+        }
+
+        .export-info strong {
+            color: #0078D4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Event Registration Database Admin</h1>
+        <p class="subtitle">View and manage all event registrations</p>
+
+        <div id="message" class="message"></div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Total Registrations</div>
+                <div class="stat-value" id="totalCount">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Database Size</div>
+                <div class="stat-value" id="dbSize">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Last Updated</div>
+                <div class="stat-value" id="lastUpdate" style="font-size: 1rem;">-</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="loadRegistrations()">🔄 Refresh</button>
+            <button class="success" onclick="exportCSV()">📥 Export CSV</button>
+            <button class="secondary" onclick="showTableInfo()">ℹ️ Table Info</button>
+            <input type="text" class="search-box" id="searchBox" placeholder="Search by name, email, or company..." onkeyup="filterTable()">
+        </div>
+
+        <div class="export-info">
+            <strong>💡 Tip:</strong> Use the search box to filter registrations. Click "Export CSV" to download all data. The CSV file will be saved in the project folder.
+        </div>
+
+        <div class="table-container">
+            <div id="loading" class="loading">Loading registrations...</div>
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <div class="empty-state-icon">📭</div>
+                <h3>No Registrations Yet</h3>
+                <p>Registrations will appear here once people start registering for the event.</p>
+            </div>
+            <table id="registrationsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Job Role</th>
+                        <th>Company</th>
+                        <th>Country</th>
+                        <th>Registered</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let allRegistrations = [];
+
+        // Load registrations on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadRegistrations();
+        });
+
+        async function loadRegistrations() {
+            const loading = document.getElementById('loading');
+            const table = document.getElementById('registrationsTable');
+            const emptyState = document.getElementById('emptyState');
+            const tableBody = document.getElementById('tableBody');
+
+            loading.style.display = 'block';
+            table.style.display = 'none';
+            emptyState.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/registrations');
+                const result = await response.json();
+
+                if (result.success) {
+                    allRegistrations = result.data;
+                    updateStats(result.count);
+                    
+                    if (result.count === 0) {
+                        loading.style.display = 'none';
+                        emptyState.style.display = 'block';
+                    } else {
+                        displayRegistrations(allRegistrations);
+                        loading.style.display = 'none';
+                        table.style.display = 'table';
+                    }
+                } else {
+                    showMessage('Error loading registrations: ' + result.message, 'error');
+                    loading.style.display = 'none';
+                }
+            } catch (error) {
+                showMessage('Error connecting to server: ' + error.message, 'error');
+                loading.style.display = 'none';
+            }
+        }
+
+        function displayRegistrations(registrations) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+
+            registrations.forEach(reg => {
+                const row = document.createElement('tr');
+                const registeredDate = new Date(reg.created_at).toLocaleString();
+                const phone = reg.full_phone || (reg.phone_country && reg.phone_number ? `${reg.phone_country} ${reg.phone_number}` : 'N/A');
+                
+                // Check if registration is recent (within last 24 hours)
+                const isNew = (Date.now() - new Date(reg.created_at).getTime()) < 24 * 60 * 60 * 1000;
+                const newBadge = isNew ? '<span class="badge new">NEW</span>' : '';
+
+                row.innerHTML = `
+                    <td>${reg.id}</td>
+                    <td>${reg.first_name}</td>
+                    <td>${reg.last_name}</td>
+                    <td>${reg.email}</td>
+                    <td>${phone}</td>
+                    <td>${reg.job_role || 'N/A'}</td>
+                    <td>${reg.company}</td>
+                    <td>${reg.country}</td>
+                    <td>${registeredDate} ${newBadge}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function filterTable() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const filtered = allRegistrations.filter(reg => {
+                return reg.first_name.toLowerCase().includes(searchTerm) ||
+                       reg.last_name.toLowerCase().includes(searchTerm) ||
+                       reg.email.toLowerCase().includes(searchTerm) ||
+                       (reg.company && reg.company.toLowerCase().includes(searchTerm));
+            });
+            displayRegistrations(filtered);
+            document.getElementById('totalCount').textContent = filtered.length;
+        }
+
+        function updateStats(count) {
+            document.getElementById('totalCount').textContent = count;
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+            
+            // Get database size (approximate)
+            fetch('/api/health')
+                .then(() => {
+                    document.getElementById('dbSize').textContent = 'Connected';
+                })
+                .catch(() => {
+                    document.getElementById('dbSize').textContent = 'N/A';
+                });
+        }
+
+        async function exportCSV() {
+            try {
+                const response = await fetch('/api/export-csv');
+                if (response.ok) {
+                    showMessage('CSV export initiated. Check the server console for file location.', 'success');
+                } else {
+                    showMessage('Error exporting CSV. Make sure the server is running.', 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+
+        function showTableInfo() {
+            alert(`Database Table: registrations
+
+Columns:
+- id (INTEGER, Primary Key)
+- first_name (TEXT, Required)
+- last_name (TEXT, Required)
+- email (TEXT, Required, Unique)
+- phone_country (TEXT)
+- phone_number (TEXT)
+- full_phone (TEXT)
+- job_role (TEXT)
+- company (TEXT, Required)
+- country (TEXT, Required)
+- created_at (DATETIME, Auto)
+
+Database Location: database/registrations.db`);
+        }
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            setTimeout(() => {
+                messageDiv.className = 'message';
+            }, 5000);
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(loadRegistrations, 30000);
+    </script>
+</body>
+</html>
+
