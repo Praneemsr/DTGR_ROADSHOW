@@ -300,11 +300,17 @@ If Git asks for authentication:
 
 #### Step 5: Enable GitHub Pages
 
+**Method 1: Using GitHub Actions (Recommended)**
+- The `.github/workflows/pages.yml` file is already created
+- Just push your code and GitHub Actions will automatically deploy
+- Go to **Settings** → **Pages** → Select **GitHub Actions** as source
+
+**Method 2: Using Branch (Traditional)**
 1. Go to your repository on GitHub
 2. Click on **Settings** (top menu)
 3. Scroll down to **Pages** in the left sidebar
 4. Under **Source**, select:
-   - **Branch**: `main`
+   - **Branch**: `main` (or `master`)
    - **Folder**: `/ (root)`
 5. Click **Save**
 
@@ -317,6 +323,8 @@ If Git asks for authentication:
 2. It may take a few minutes (up to 10 minutes) for the site to be available
 3. You'll see a green checkmark when deployment is complete
 4. The URL will be displayed in the Pages settings section
+
+**⚠️ Important Note**: GitHub Pages only serves static files. The Node.js backend (API, database) will NOT work on GitHub Pages. See `GITHUB_PAGES_SETUP.md` for solutions.
 
 ### Updating Your Site
 

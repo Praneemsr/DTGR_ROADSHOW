@@ -273,6 +273,43 @@
     <script>
         let allRegistrations = [];
 
+        // Get API base URL - works for both localhost and deployed sites
+        function getApiUrl() {
+            // Check if we have a configured backend URL
+            const backendUrl = localStorage.getItem('backendApiUrl');
+            if (backendUrl) {
+                return backendUrl;
+            }
+            
+            // For localhost development
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                return 'http://localhost:3000';
+            }
+            
+            // For GitHub Pages or deployed sites, try to detect backend
+            // You can set this in localStorage or update this default
+            const defaultBackend = 'https://event-registration-backend-omega.vercel.app';
+            
+            // If on GitHub Pages and no backend configured, prompt user
+            if (window.location.hostname.includes('github.io') && !backendUrl) {
+                const userBackend = prompt(
+                    'Backend API URL not configured!\n\n' +
+                    'Please enter your backend API URL:\n' +
+                    '(e.g., https://your-backend.vercel.app)\n\n' +
+                    'This will be saved for future use.',
+                    defaultBackend
+                );
+                if (userBackend && userBackend.trim()) {
+                    localStorage.setItem('backendApiUrl', userBackend.trim());
+                    return userBackend.trim();
+                }
+            }
+            
+            return defaultBackend;
+        }
+
+        const API_BASE_URL = getApiUrl();
+
         // Load registrations on page load
         window.addEventListener('DOMContentLoaded', () => {
             loadRegistrations();
@@ -289,7 +326,7 @@
             emptyState.style.display = 'none';
 
             try {
-                const response = await fetch('/api/registrations');
+                const response = await fetch(`${API_BASE_URL}/api/registrations`);
                 const result = await response.json();
 
                 if (result.success) {
@@ -309,7 +346,19 @@
                     loading.style.display = 'none';
                 }
             } catch (error) {
-                showMessage('Error connecting to server: ' + error.message, 'error');
+                let errorMsg = 'Error connecting to server: ' + error.message;
+                
+                // Special message for GitHub Pages
+                if (window.location.hostname.includes('github.io') && !localStorage.getItem('backendApiUrl')) {
+                    errorMsg = '⚠️ Backend API not configured!\n\n' +
+                               'GitHub Pages cannot run Node.js backends.\n\n' +
+                               'Please:\n' +
+                               '1. Deploy backend to Vercel/Railway/Render\n' +
+                               '2. Enter your backend URL when prompted\n\n' +
+                               'See DEPLOY_BACKEND.md for instructions.';
+                }
+                
+                showMessage(errorMsg, 'error');
                 loading.style.display = 'none';
             }
         }
@@ -359,7 +408,7 @@
             document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
             
             // Get database size (approximate)
-            fetch('/api/health')
+            fetch(`${API_BASE_URL}/api/health`)
                 .then(() => {
                     document.getElementById('dbSize').textContent = 'Connected';
                 })
@@ -370,7 +419,7 @@
 
         async function exportCSV() {
             try {
-                const response = await fetch('/api/export-csv');
+                const response = await fetch(`${API_BASE_URL}/api/export-csv`);
                 if (response.ok) {
                     showMessage('CSV export initiated. Check the server console for file location.', 'success');
                 } else {

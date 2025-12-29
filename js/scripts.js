@@ -53,8 +53,29 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         try {
+            // Get API base URL - works for both localhost and deployed sites
+            const getApiUrl = () => {
+                // Check if we have a configured backend URL
+                const backendUrl = localStorage.getItem('backendApiUrl');
+                if (backendUrl) {
+                    return backendUrl;
+                }
+                
+                // For localhost development
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    return 'http://localhost:3000';
+                }
+                
+                // For GitHub Pages or deployed sites, try to detect backend
+                // You can set this in localStorage or update this default
+                const defaultBackend = 'https://event-registration-backend-omega.vercel.app';
+                return defaultBackend;
+            };
+            
+            const API_BASE_URL = getApiUrl();
+            
             // Send registration data to backend API
-            const response = await fetch('http://localhost:3000/api/register', {
+            const response = await fetch(`${API_BASE_URL}/api/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

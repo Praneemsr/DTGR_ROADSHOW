@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const DB_PATH = path.join(__dirname, 'database', 'registrations.db');
 
 // Ensure database directory exists
@@ -25,7 +25,37 @@ let SQL;
 
 (async () => {
     try {
-        SQL = await initSqlJs();
+        // Configure sql.js for Vercel/serverless environment
+        // Load WASM from CDN for better compatibility with serverless
+        SQL = await initSqlJs({
+            locateFile: (file) => {
+                if (file.endsWith('.wasm')) {
+                    // For Vercel/serverless, use CDN as primary source
+                    // This is more reliable than trying to load from filesystem
+                    if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+                        // Use jsDelivr CDN for sql.js WASM
+                        return 'https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/sql-wasm.wasm';
+                    }
+                    
+                    // For local development, try local paths
+                    const possiblePaths = [
+                        path.join(__dirname, 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm'),
+                        path.join(process.cwd(), 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm')
+                    ];
+                    
+                    for (const wasmPath of possiblePaths) {
+                        if (fs.existsSync(wasmPath)) {
+                            console.log('Found WASM file at:', wasmPath);
+                            return wasmPath;
+                        }
+                    }
+                    
+                    // Fallback to CDN
+                    return 'https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/sql-wasm.wasm';
+                }
+                return file;
+            }
+        });
         
         // Load existing database or create new one
         let buffer;
