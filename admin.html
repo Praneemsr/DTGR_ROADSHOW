@@ -235,15 +235,21 @@
         <div class="controls">
             <button onclick="loadRegistrations()">🔄 Refresh</button>
             <button class="success" onclick="exportCSV()">📥 Export CSV</button>
+            <button class="secondary" onclick="showAllTables()">📊 View All Tables</button>
             <button class="secondary" onclick="showTableInfo()">ℹ️ Table Info</button>
             <input type="text" class="search-box" id="searchBox" placeholder="Search by name, email, or company..." onkeyup="filterTable()">
+        </div>
+        
+        <div id="tablesView" style="display: none;">
+            <h2>Database Tables</h2>
+            <div id="tablesContainer"></div>
         </div>
 
         <div class="export-info">
             <strong>💡 Tip:</strong> Use the search box to filter registrations. Click "Export CSV" to download all data. The CSV file will be saved in the project folder.
         </div>
 
-        <div class="table-container">
+        <div id="tableContainer" class="table-container">
             <div id="loading" class="loading">Loading registrations...</div>
             <div id="emptyState" class="empty-state" style="display: none;">
                 <div class="empty-state-icon">📭</div>

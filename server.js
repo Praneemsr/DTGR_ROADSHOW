@@ -6,12 +6,18 @@ const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DB_PATH = path.join(__dirname, 'database', 'registrations.db');
 
-// Ensure database directory exists
-const dbDir = path.dirname(DB_PATH);
-if (!fs.existsSync(dbDir)) {
-    fs.mkdirSync(dbDir, { recursive: true });
+// Use /tmp for database on Vercel (writable), otherwise use local database folder
+const DB_PATH = process.env.VERCEL 
+    ? '/tmp/registrations.db'
+    : path.join(__dirname, 'database', 'registrations.db');
+
+// Ensure database directory exists (only for local)
+if (!process.env.VERCEL) {
+    const dbDir = path.dirname(DB_PATH);
+    if (!fs.existsSync(dbDir)) {
+        fs.mkdirSync(dbDir, { recursive: true });
+    }
 }
 
 // Middleware
@@ -22,81 +28,158 @@ app.use(express.static(__dirname)); // Serve static files (HTML, CSS, JS)
 // Initialize database
 let db;
 let SQL;
+let dbReady = false;
+let dbInitPromise = null;
 
-(async () => {
-    try {
-        // Configure sql.js for Vercel/serverless environment
-        // Load WASM from CDN for better compatibility with serverless
-        SQL = await initSqlJs({
-            locateFile: (file) => {
-                if (file.endsWith('.wasm')) {
-                    // For Vercel/serverless, use CDN as primary source
-                    // This is more reliable than trying to load from filesystem
-                    if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
-                        // Use jsDelivr CDN for sql.js WASM
-                        return 'https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/sql-wasm.wasm';
-                    }
-                    
-                    // For local development, try local paths
-                    const possiblePaths = [
-                        path.join(__dirname, 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm'),
-                        path.join(process.cwd(), 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm')
-                    ];
-                    
-                    for (const wasmPath of possiblePaths) {
-                        if (fs.existsSync(wasmPath)) {
-                            console.log('Found WASM file at:', wasmPath);
+// Helper function to download WASM file for serverless environments
+async function downloadWasmFile() {
+    const https = require('https');
+    const wasmUrl = 'https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/sql-wasm.wasm';
+    const wasmPath = '/tmp/sql-wasm.wasm';
+    
+    // Check if already downloaded
+    if (fs.existsSync(wasmPath)) {
+        return wasmPath;
+    }
+    
+    return new Promise((resolve, reject) => {
+        const file = fs.createWriteStream(wasmPath);
+        https.get(wasmUrl, (response) => {
+            if (response.statusCode === 200) {
+                response.pipe(file);
+                file.on('finish', () => {
+                    file.close();
+                    console.log('WASM file downloaded to:', wasmPath);
+                    resolve(wasmPath);
+                });
+            } else {
+                reject(new Error(`Failed to download WASM: ${response.statusCode}`));
+            }
+        }).on('error', (err) => {
+            fs.unlink(wasmPath, () => {}); // Delete partial file
+            reject(err);
+        });
+    });
+}
+
+// Initialize database function
+async function initializeDatabase() {
+    if (dbReady) {
+        return; // Already initialized
+    }
+    
+    if (dbInitPromise) {
+        return dbInitPromise; // Initialization in progress
+    }
+    
+    dbInitPromise = (async () => {
+        try {
+            console.log('Starting database initialization...');
+            let wasmPath;
+            
+            // For Vercel/serverless, download WASM to /tmp
+            if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+                try {
+                    wasmPath = await downloadWasmFile();
+                    console.log('WASM file ready');
+                } catch (err) {
+                    console.warn('Failed to download WASM from CDN, trying local paths:', err.message);
+                    wasmPath = null;
+                }
+            }
+            
+            // Configure sql.js
+            const sqlJsConfig = {
+                locateFile: (file) => {
+                    if (file.endsWith('.wasm')) {
+                        // Use downloaded WASM if available
+                        if (wasmPath && fs.existsSync(wasmPath)) {
                             return wasmPath;
                         }
+                        
+                        // Try local paths for development
+                        const possiblePaths = [
+                            path.join(__dirname, 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm'),
+                            path.join(process.cwd(), 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm'),
+                            '/var/task/node_modules/sql.js/dist/sql-wasm.wasm'
+                        ];
+                        
+                        for (const localPath of possiblePaths) {
+                            if (fs.existsSync(localPath)) {
+                                console.log('Found WASM file at:', localPath);
+                                return localPath;
+                            }
+                        }
+                        
+                        // If all else fails, return the downloaded path (will be created)
+                        return wasmPath || '/tmp/sql-wasm.wasm';
                     }
-                    
-                    // Fallback to CDN
-                    return 'https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/sql-wasm.wasm';
+                    return file;
                 }
-                return file;
+            };
+            
+            console.log('Initializing sql.js...');
+            SQL = await initSqlJs(sqlJsConfig);
+            console.log('sql.js initialized');
+            
+            // Load existing database or create new one
+            let buffer;
+            if (fs.existsSync(DB_PATH)) {
+                buffer = fs.readFileSync(DB_PATH);
+                db = new SQL.Database(buffer);
+                console.log('Loaded existing database');
+            } else {
+                db = new SQL.Database();
+                console.log('Created new database');
             }
-        });
-        
-        // Load existing database or create new one
-        let buffer;
-        if (fs.existsSync(DB_PATH)) {
-            buffer = fs.readFileSync(DB_PATH);
-            db = new SQL.Database(buffer);
-            console.log('Loaded existing database');
-        } else {
-            db = new SQL.Database();
-            console.log('Created new database');
+            
+            // Create table if it doesn't exist
+            db.run(`CREATE TABLE IF NOT EXISTS registrations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                first_name TEXT NOT NULL,
+                last_name TEXT NOT NULL,
+                email TEXT NOT NULL UNIQUE,
+                phone_country TEXT,
+                phone_number TEXT,
+                full_phone TEXT,
+                job_role TEXT,
+                company TEXT NOT NULL,
+                country TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )`);
+            
+            // Save database to file (only if not on Vercel - /tmp is ephemeral)
+            if (!process.env.VERCEL) {
+                const data = db.export();
+                fs.writeFileSync(DB_PATH, Buffer.from(data));
+            }
+            
+            console.log('Database table ready');
+            console.log(`Database location: ${DB_PATH}`);
+            dbReady = true;
+            console.log('Database initialization complete!');
+        } catch (err) {
+            console.error('Error initializing database:', err.message);
+            console.error('Stack:', err.stack);
+            dbReady = false;
+            throw err;
         }
-        
-        // Create table if it doesn't exist
-        db.run(`CREATE TABLE IF NOT EXISTS registrations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            first_name TEXT NOT NULL,
-            last_name TEXT NOT NULL,
-            email TEXT NOT NULL UNIQUE,
-            phone_country TEXT,
-            phone_number TEXT,
-            full_phone TEXT,
-            job_role TEXT,
-            company TEXT NOT NULL,
-            country TEXT NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
-        
-        // Save database to file
-        const data = db.export();
-        fs.writeFileSync(DB_PATH, Buffer.from(data));
-        
-        console.log('Database table ready');
-        console.log(`Database location: ${DB_PATH}`);
-    } catch (err) {
-        console.error('Error initializing database:', err.message);
-        process.exit(1);
-    }
-})();
+    })();
+    
+    return dbInitPromise;
+}
+
+// Start initialization immediately
+initializeDatabase().catch(err => {
+    console.error('Failed to initialize database:', err);
+});
 
 // Helper function to save database
 function saveDatabase() {
+    if (!db || !dbReady) {
+        console.warn('Database not ready, skipping save');
+        return;
+    }
     try {
         const data = db.export();
         fs.writeFileSync(DB_PATH, Buffer.from(data));
@@ -105,8 +188,31 @@ function saveDatabase() {
     }
 }
 
+// Middleware to check if database is ready
+async function checkDbReady(req, res, next) {
+    if (!dbReady || !db) {
+        // Try to initialize if not already in progress
+        try {
+            await initializeDatabase();
+            if (!dbReady || !db) {
+                return res.status(503).json({
+                    success: false,
+                    message: 'Database is initializing, please try again in a moment'
+                });
+            }
+        } catch (err) {
+            console.error('Database initialization error in middleware:', err);
+            return res.status(503).json({
+                success: false,
+                message: 'Database initialization failed: ' + err.message
+            });
+        }
+    }
+    next();
+}
+
 // API Route: Register new attendee
-app.post('/api/register', (req, res) => {
+app.post('/api/register', checkDbReady, (req, res) => {
     const {
         me_firstname,
         me_lastname,
@@ -136,14 +242,20 @@ app.post('/api/register', (req, res) => {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     try {
+        if (!db || !dbReady) {
+            throw new Error('Database not initialized');
+        }
+        
         const stmt = db.prepare(sql);
         stmt.bind([me_firstname, me_lastname, me_email, phoneCountry, phoneNumber, me_phonenumber || '', jobRole || '', me_companyname, me_country]);
         stmt.step();
         const id = db.exec("SELECT last_insert_rowid() as id")[0].values[0][0];
         stmt.free();
         
-        // Save database
-        saveDatabase();
+        // Save database (only if not on Vercel - Vercel /tmp is ephemeral)
+        if (!process.env.VERCEL) {
+            saveDatabase();
+        }
         
         res.json({
             success: true,
@@ -166,8 +278,12 @@ app.post('/api/register', (req, res) => {
 });
 
 // API Route: Get all registrations (for admin/testing purposes)
-app.get('/api/registrations', (req, res) => {
+app.get('/api/registrations', checkDbReady, (req, res) => {
     try {
+        if (!db || !dbReady) {
+            throw new Error('Database not initialized');
+        }
+        
         const result = db.exec('SELECT * FROM registrations ORDER BY created_at DESC');
         const rows = result.length > 0 ? result[0].values.map(row => {
             const cols = result[0].columns;
@@ -194,7 +310,66 @@ app.get('/api/registrations', (req, res) => {
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', message: 'Server is running' });
+    res.json({ 
+        status: 'ok', 
+        message: 'Server is running',
+        database: dbReady ? 'ready' : 'initializing'
+    });
+});
+
+// API Route: Get all database tables
+app.get('/api/tables', checkDbReady, (req, res) => {
+    try {
+        if (!db || !dbReady) {
+            throw new Error('Database not initialized');
+        }
+        
+        // Get all tables
+        const tablesResult = db.exec("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name");
+        const tables = tablesResult.length > 0 ? tablesResult[0].values.map(row => row[0]) : [];
+        
+        // Get table info for each table
+        const tableInfo = tables.map(tableName => {
+            try {
+                const columnsResult = db.exec(`PRAGMA table_info(${tableName})`);
+                const columns = columnsResult.length > 0 ? columnsResult[0].values.map(row => ({
+                    name: row[1],
+                    type: row[2],
+                    notNull: row[3] === 1,
+                    defaultValue: row[4],
+                    primaryKey: row[5] === 1
+                })) : [];
+                
+                // Get row count
+                const countResult = db.exec(`SELECT COUNT(*) as count FROM ${tableName}`);
+                const count = countResult.length > 0 && countResult[0].values.length > 0 
+                    ? countResult[0].values[0][0] : 0;
+                
+                return {
+                    name: tableName,
+                    columns: columns,
+                    rowCount: count
+                };
+            } catch (err) {
+                return {
+                    name: tableName,
+                    error: err.message
+                };
+            }
+        });
+        
+        res.json({
+            success: true,
+            count: tables.length,
+            tables: tableInfo
+        });
+    } catch (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({
+            success: false,
+            message: 'Error fetching tables: ' + err.message
+        });
+    }
 });
 
 // Admin page route
