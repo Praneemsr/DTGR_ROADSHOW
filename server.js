@@ -39,23 +39,32 @@ async function downloadWasmFile() {
     
     // Check if already downloaded
     if (fs.existsSync(wasmPath)) {
+        console.log('WASM file already exists');
         return wasmPath;
     }
     
     return new Promise((resolve, reject) => {
+        // Set timeout (30 seconds)
+        const timeout = setTimeout(() => {
+            reject(new Error('WASM download timeout after 30 seconds'));
+        }, 30000);
+        
         const file = fs.createWriteStream(wasmPath);
-        https.get(wasmUrl, (response) => {
+        https.get(wasmUrl, { timeout: 25000 }, (response) => {
             if (response.statusCode === 200) {
                 response.pipe(file);
                 file.on('finish', () => {
+                    clearTimeout(timeout);
                     file.close();
                     console.log('WASM file downloaded to:', wasmPath);
                     resolve(wasmPath);
                 });
             } else {
+                clearTimeout(timeout);
                 reject(new Error(`Failed to download WASM: ${response.statusCode}`));
             }
         }).on('error', (err) => {
+            clearTimeout(timeout);
             fs.unlink(wasmPath, () => {}); // Delete partial file
             reject(err);
         });
@@ -80,7 +89,11 @@ async function initializeDatabase() {
             // For Vercel/serverless, download WASM to /tmp
             if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
                 try {
-                    wasmPath = await downloadWasmFile();
+                    console.log('Downloading WASM file...');
+                    wasmPath = await Promise.race([
+                        downloadWasmFile(),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('WASM download timeout')), 30000))
+                    ]);
                     console.log('WASM file ready');
                 } catch (err) {
                     console.warn('Failed to download WASM from CDN, trying local paths:', err.message);
@@ -310,10 +323,13 @@ app.get('/api/registrations', checkDbReady, (req, res) => {
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
+    const initStatus = dbReady ? 'ready' : (dbInitPromise ? 'initializing' : 'not_started');
     res.json({ 
         status: 'ok', 
         message: 'Server is running',
-        database: dbReady ? 'ready' : 'initializing'
+        database: initStatus,
+        hasDb: !!db,
+        hasSQL: !!SQL
     });
 });
 
@@ -384,53 +400,66 @@ app.get('/api/export-csv', checkDbReady, (req, res) => {
             throw new Error('Database not initialized');
         }
         
-        // Get all registrations
-        const result = db.exec('SELECT * FROM registrations ORDER BY created_at DESC');
-        const rows = result.length > 0 ? result[0].values.map(row => {
-            const cols = result[0].columns;
-            const obj = {};
-            cols.forEach((col, i) => {
-                obj[col] = row[i];
-            });
-            return obj;
-        }) : [];
+        console.log('Starting CSV export...');
         
-        if (rows.length === 0) {
+        // Get all registrations - optimized query
+        const result = db.exec('SELECT id, first_name, last_name, email, phone_country, phone_number, full_phone, job_role, company, country, created_at FROM registrations ORDER BY created_at DESC');
+        
+        if (result.length === 0 || !result[0] || result[0].values.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: 'No registrations found to export'
             });
         }
         
-        // Generate CSV
+        const rows = result[0].values;
+        const cols = result[0].columns;
+        
+        console.log(`Exporting ${rows.length} registrations...`);
+        
+        // Generate CSV efficiently
         const headers = ['ID', 'First Name', 'Last Name', 'Email', 'Phone Country', 'Phone Number', 'Full Phone', 'Job Role', 'Company', 'Country', 'Registered Date'];
         const csvRows = [headers.join(',')];
         
-        rows.forEach(row => {
+        // Helper function to escape CSV values
+        const escapeCsv = (val) => {
+            if (val === null || val === undefined) return '""';
+            const str = String(val);
+            return `"${str.replace(/"/g, '""')}"`;
+        };
+        
+        // Build CSV rows
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
             const csvRow = [
-                row.id || '',
-                `"${(row.first_name || '').replace(/"/g, '""')}"`,
-                `"${(row.last_name || '').replace(/"/g, '""')}"`,
-                `"${(row.email || '').replace(/"/g, '""')}"`,
-                `"${(row.phone_country || '').replace(/"/g, '""')}"`,
-                `"${(row.phone_number || '').replace(/"/g, '""')}"`,
-                `"${(row.full_phone || '').replace(/"/g, '""')}"`,
-                `"${(row.job_role || '').replace(/"/g, '""')}"`,
-                `"${(row.company || '').replace(/"/g, '""')}"`,
-                `"${(row.country || '').replace(/"/g, '""')}"`,
-                `"${(row.created_at || '').replace(/"/g, '""')}"`
+                row[cols.indexOf('id')] || '',
+                escapeCsv(row[cols.indexOf('first_name')]),
+                escapeCsv(row[cols.indexOf('last_name')]),
+                escapeCsv(row[cols.indexOf('email')]),
+                escapeCsv(row[cols.indexOf('phone_country')]),
+                escapeCsv(row[cols.indexOf('phone_number')]),
+                escapeCsv(row[cols.indexOf('full_phone')]),
+                escapeCsv(row[cols.indexOf('job_role')]),
+                escapeCsv(row[cols.indexOf('company')]),
+                escapeCsv(row[cols.indexOf('country')]),
+                escapeCsv(row[cols.indexOf('created_at')])
             ];
             csvRows.push(csvRow.join(','));
-        });
+        }
         
         const csvContent = csvRows.join('\n');
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
         const filename = `registrations_${timestamp}.csv`;
         
+        console.log(`CSV generated: ${csvContent.length} bytes`);
+        
         // Set headers for file download
-        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', Buffer.byteLength(csvContent, 'utf8'));
         res.send(csvContent);
+        
+        console.log('CSV export completed');
         
     } catch (err) {
         console.error('CSV export error:', err);
