@@ -377,31 +377,68 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
-// CSV Export endpoint (triggers export script)
-app.get('/api/export-csv', (req, res) => {
-    const { exec } = require('child_process');
-    const path = require('path');
-    
-    exec('npm run export-csv', { cwd: __dirname }, (error, stdout, stderr) => {
-        if (error) {
-            console.error('Export error:', error);
-            return res.status(500).json({
+// CSV Export endpoint (generates CSV directly)
+app.get('/api/export-csv', checkDbReady, (req, res) => {
+    try {
+        if (!db || !dbReady) {
+            throw new Error('Database not initialized');
+        }
+        
+        // Get all registrations
+        const result = db.exec('SELECT * FROM registrations ORDER BY created_at DESC');
+        const rows = result.length > 0 ? result[0].values.map(row => {
+            const cols = result[0].columns;
+            const obj = {};
+            cols.forEach((col, i) => {
+                obj[col] = row[i];
+            });
+            return obj;
+        }) : [];
+        
+        if (rows.length === 0) {
+            return res.status(404).json({
                 success: false,
-                message: 'Error exporting CSV: ' + error.message
+                message: 'No registrations found to export'
             });
         }
         
-        // Extract filename from output
-        const match = stdout.match(/File: (.+)/);
-        const filename = match ? match[1] : 'unknown';
+        // Generate CSV
+        const headers = ['ID', 'First Name', 'Last Name', 'Email', 'Phone Country', 'Phone Number', 'Full Phone', 'Job Role', 'Company', 'Country', 'Registered Date'];
+        const csvRows = [headers.join(',')];
         
-        res.json({
-            success: true,
-            message: 'CSV exported successfully',
-            filename: filename,
-            output: stdout
+        rows.forEach(row => {
+            const csvRow = [
+                row.id || '',
+                `"${(row.first_name || '').replace(/"/g, '""')}"`,
+                `"${(row.last_name || '').replace(/"/g, '""')}"`,
+                `"${(row.email || '').replace(/"/g, '""')}"`,
+                `"${(row.phone_country || '').replace(/"/g, '""')}"`,
+                `"${(row.phone_number || '').replace(/"/g, '""')}"`,
+                `"${(row.full_phone || '').replace(/"/g, '""')}"`,
+                `"${(row.job_role || '').replace(/"/g, '""')}"`,
+                `"${(row.company || '').replace(/"/g, '""')}"`,
+                `"${(row.country || '').replace(/"/g, '""')}"`,
+                `"${(row.created_at || '').replace(/"/g, '""')}"`
+            ];
+            csvRows.push(csvRow.join(','));
         });
-    });
+        
+        const csvContent = csvRows.join('\n');
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+        const filename = `registrations_${timestamp}.csv`;
+        
+        // Set headers for file download
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.send(csvContent);
+        
+    } catch (err) {
+        console.error('CSV export error:', err);
+        return res.status(500).json({
+            success: false,
+            message: 'Error exporting CSV: ' + err.message
+        });
+    }
 });
 
 // Start server

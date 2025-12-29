@@ -427,9 +427,31 @@
             try {
                 const response = await fetch(`${API_BASE_URL}/api/export-csv`);
                 if (response.ok) {
-                    showMessage('CSV export initiated. Check the server console for file location.', 'success');
+                    // Get filename from Content-Disposition header or use default
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    let filename = 'registrations.csv';
+                    if (contentDisposition) {
+                        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                        if (filenameMatch) {
+                            filename = filenameMatch[1];
+                        }
+                    }
+                    
+                    // Get CSV content and create download
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    showMessage(`CSV file "${filename}" downloaded successfully!`, 'success');
                 } else {
-                    showMessage('Error exporting CSV. Make sure the server is running.', 'error');
+                    const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+                    showMessage('Error exporting CSV: ' + (errorData.message || 'Make sure the server is running.'), 'error');
                 }
             } catch (error) {
                 showMessage('Error: ' + error.message, 'error');
