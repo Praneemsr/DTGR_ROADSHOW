@@ -27,15 +27,17 @@
 
     <!-- Main Event Content -->
     <main>
-        <section class="event-hero">
-            <!-- Left column: Event details -->
-            <div class="event-info">
+        <!-- Event Banner -->
+        <section class="event-banner">
+            <div class="banner-content">
                 <span class="event-format">In person</span>
                 <h1 class="event-title">Microsoft Digital Trust & Global Regulations Program</h1>
                 <h2 class="event-subtitle">Microsoft Digital Trust & Security Summit: Paris - AI Tour Pre-Day</h2>
-                <p class="event-location"><strong>Where:</strong> Paris, France</p>
-                <p class="event-datetime"><strong>When:</strong> Tuesday, March 10, 2026</p>
-                <p class="event-audience"><strong>Audience:</strong> Up to 120 attendees (C-suite, CISOs, DPOs, regulators, security & compliance leaders)</p>
+                <div class="banner-details">
+                    <p class="event-location"><strong>Where:</strong> Paris, France</p>
+                    <p class="event-datetime"><strong>When:</strong> Tuesday, March 10, 2026</p>
+                    <p class="event-audience"><strong>Audience:</strong> Up to 120 attendees (C-suite, CISOs, DPOs, regulators, security & compliance leaders)</p>
+                </div>
                 <p class="event-description">
                     Join us for an exclusive pre-day event focused on securing the AI era through digital trust. 
                     Explore how Microsoft is building trust through security, compliance, and responsible AI, 
@@ -43,96 +45,15 @@
                     and EU AI Act requirements.
                 </p>
             </div>
-
-            <!-- Right column: Registration form -->
-            <div class="registration-form">
-                <h2>Register Now</h2>
-                <form id="registerForm">
-                    <div class="form-group">
-                        <label for="firstName">First Name <span class="required">*</span></label>
-                        <input id="firstName" name="firstName" type="text" required aria-required="true" aria-describedby="firstName-desc">
-                        <span id="firstName-desc" class="sr-only">Enter your first name</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="lastName">Last Name <span class="required">*</span></label>
-                        <input id="lastName" name="lastName" type="text" required aria-required="true" aria-describedby="lastName-desc">
-                        <span id="lastName-desc" class="sr-only">Enter your last name</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email Address <span class="required">*</span></label>
-                        <input id="email" name="email" type="email" required aria-required="true" aria-describedby="email-desc">
-                        <span id="email-desc" class="sr-only">Enter a valid email address</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Phone Number</label>
-                        <div class="phone-input">
-                            <!-- Country code dropdown -->
-                            <select name="phoneCountry" id="phoneCountry" required>
-                                <option value="+1">+1 (US)</option>
-                                <option value="+44">+44 (UK)</option>
-                                <option value="+65">+65 (SG)</option>
-                                <option value="+61">+61 (AU)</option>
-                                <option value="+91">+91 (IN)</option>
-                                <option value="+86">+86 (CN)</option>
-                                <option value="+81">+81 (JP)</option>
-                                <option value="+49">+49 (DE)</option>
-                                <option value="+33">+33 (FR)</option>
-                                <option value="+39">+39 (IT)</option>
-                            </select>
-                            <input id="phoneNumber" name="phoneNumber" type="tel" required placeholder="Phone Number">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="jobRole">Job Role</label>
-                        <input id="jobRole" name="jobRole" type="text" placeholder="e.g. IT Administrator">
-                    </div>
-                    <div class="form-group">
-                        <label for="company">Company Name</label>
-                        <input id="company" name="company" type="text" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="country">Country/Region</label>
-                        <select id="country" name="country" required>
-                            <option value="">-- Select Country --</option>
-                            <option value="US">United States</option>
-                            <option value="CA">Canada</option>
-                            <option value="SG">Singapore</option>
-                            <option value="AU">Australia</option>
-                            <option value="IN">India</option>
-                            <option value="GB">United Kingdom</option>
-                            <option value="DE">Germany</option>
-                            <option value="FR">France</option>
-                            <option value="IT">Italy</option>
-                            <option value="JP">Japan</option>
-                            <option value="CN">China</option>
-                            <option value="BR">Brazil</option>
-                            <option value="MX">Mexico</option>
-                            <option value="ES">Spain</option>
-                            <option value="NL">Netherlands</option>
-                            <option value="SE">Sweden</option>
-                            <option value="NO">Norway</option>
-                            <option value="DK">Denmark</option>
-                            <option value="FI">Finland</option>
-                            <option value="PL">Poland</option>
-                            <option value="BE">Belgium</option>
-                        </select>
-                    </div>
-                    <!-- Privacy consent and submit -->
-                    <div class="form-group checkbox-group">
-                        <input id="acceptTerms" name="acceptTerms" type="checkbox" required>
-                        <label for="acceptTerms">I agree to the Microsoft Privacy Statement</label>
-                    </div>
-                    <button type="submit" id="registerButton">Register</button>
-                    <div id="formMessage" class="form-message"></div>
-                </form>
-            </div>
         </section>
 
-        <!-- Agenda Section -->
-        <section class="event-agenda">
-            <div class="agenda-container">
-                <h2 class="agenda-title">Event Agenda</h2>
-                <div class="agenda-timeline">
+        <!-- Main Content: Agenda (Left) and Registration (Right) -->
+        <section class="main-content">
+            <!-- Left column: Agenda -->
+            <div class="agenda-section">
+                <div class="agenda-container">
+                    <h2 class="agenda-title">Event Agenda</h2>
+                    <div class="agenda-timeline">
                     <div class="agenda-item">
                         <div class="agenda-time">8:30 AM – 9:00 AM</div>
                         <div class="agenda-content">
@@ -245,6 +166,89 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Right column: Registration form -->
+            <div class="registration-form">
+                <h2>Register Now</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="firstName">First Name <span class="required">*</span></label>
+                        <input id="firstName" name="firstName" type="text" required aria-required="true" aria-describedby="firstName-desc">
+                        <span id="firstName-desc" class="sr-only">Enter your first name</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name <span class="required">*</span></label>
+                        <input id="lastName" name="lastName" type="text" required aria-required="true" aria-describedby="lastName-desc">
+                        <span id="lastName-desc" class="sr-only">Enter your last name</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address <span class="required">*</span></label>
+                        <input id="email" name="email" type="email" required aria-required="true" aria-describedby="email-desc">
+                        <span id="email-desc" class="sr-only">Enter a valid email address</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <div class="phone-input">
+                            <!-- Country code dropdown -->
+                            <select name="phoneCountry" id="phoneCountry" required>
+                                <option value="+1">+1 (US)</option>
+                                <option value="+44">+44 (UK)</option>
+                                <option value="+65">+65 (SG)</option>
+                                <option value="+61">+61 (AU)</option>
+                                <option value="+91">+91 (IN)</option>
+                                <option value="+86">+86 (CN)</option>
+                                <option value="+81">+81 (JP)</option>
+                                <option value="+49">+49 (DE)</option>
+                                <option value="+33">+33 (FR)</option>
+                                <option value="+39">+39 (IT)</option>
+                            </select>
+                            <input id="phoneNumber" name="phoneNumber" type="tel" required placeholder="Phone Number">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="jobRole">Job Role</label>
+                        <input id="jobRole" name="jobRole" type="text" placeholder="e.g. IT Administrator">
+                    </div>
+                    <div class="form-group">
+                        <label for="company">Company Name</label>
+                        <input id="company" name="company" type="text" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country/Region</label>
+                        <select id="country" name="country" required>
+                            <option value="">-- Select Country --</option>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                            <option value="SG">Singapore</option>
+                            <option value="AU">Australia</option>
+                            <option value="IN">India</option>
+                            <option value="GB">United Kingdom</option>
+                            <option value="DE">Germany</option>
+                            <option value="FR">France</option>
+                            <option value="IT">Italy</option>
+                            <option value="JP">Japan</option>
+                            <option value="CN">China</option>
+                            <option value="BR">Brazil</option>
+                            <option value="MX">Mexico</option>
+                            <option value="ES">Spain</option>
+                            <option value="NL">Netherlands</option>
+                            <option value="SE">Sweden</option>
+                            <option value="NO">Norway</option>
+                            <option value="DK">Denmark</option>
+                            <option value="FI">Finland</option>
+                            <option value="PL">Poland</option>
+                            <option value="BE">Belgium</option>
+                        </select>
+                    </div>
+                    <!-- Privacy consent and submit -->
+                    <div class="form-group checkbox-group">
+                        <input id="acceptTerms" name="acceptTerms" type="checkbox" required>
+                        <label for="acceptTerms">I agree to the Microsoft Privacy Statement</label>
+                    </div>
+                    <button type="submit" id="registerButton">Register</button>
+                    <div id="formMessage" class="form-message"></div>
+                </form>
             </div>
         </section>
     </main>
