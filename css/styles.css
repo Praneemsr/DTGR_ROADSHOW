@@ -7,14 +7,32 @@
     padding: 2rem;
     gap: 2rem;
     min-height: 600px;
+    position: relative;
+}
+
+.event-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 120, 212, 0.1) 0%, rgba(0, 120, 212, 0.05) 100%);
+    pointer-events: none;
 }
 
 .event-info, .registration-form {
     background: rgba(255, 255, 255, 0.95); /* light overlay to ensure text legibility over image */
     padding: 1.5rem;
-    border-radius: 4px;
+    border-radius: 8px;
     flex: 1;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.event-info:hover, .registration-form:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 /* To make the left column larger than right, one could adjust flex ratios if needed */
@@ -39,6 +57,18 @@ body {
     margin: 0.5rem 0;
     color: #1b1b1b;
     line-height: 1.3;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .event-format {
@@ -73,6 +103,7 @@ body {
     font-size: 1.25rem;
     margin-bottom: 1rem;
     color: #1b1b1b;
+    animation: fadeInUp 0.6s ease-out 0.2s both;
 }
 
 .form-group {
@@ -84,6 +115,23 @@ body {
     font-weight: 600;
     margin-bottom: 0.3rem;
     color: #323130;
+}
+
+.required {
+    color: #d13438;
+    font-weight: bold;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
 }
 
 .form-group input,
@@ -102,6 +150,32 @@ body {
     outline: none;
     border-color: #0078D4;
     box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+    transition: all 0.2s ease;
+}
+
+.form-group input.invalid,
+.form-group select.invalid {
+    border-color: #d13438;
+    box-shadow: 0 0 0 2px rgba(209, 52, 56, 0.2);
+}
+
+.form-group input.valid:not(:focus),
+.form-group select.valid:not(:focus) {
+    border-color: #107c10;
+}
+
+/* Input validation icons */
+.form-group {
+    position: relative;
+}
+
+.form-group input.valid,
+.form-group select.valid {
+    padding-right: 2.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%23107c10' d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 16px;
 }
 
 .phone-input {
@@ -146,27 +220,69 @@ button#registerButton {
     cursor: pointer;
     width: 100%;
     font-weight: 600;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-button#registerButton:hover {
+button#registerButton:hover:not(:disabled) {
     background: #005EA6;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 120, 212, 0.3);
 }
 
-button#registerButton:active {
+button#registerButton:active:not(:disabled) {
     background: #004578;
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 120, 212, 0.2);
 }
 
 button#registerButton:disabled {
     background: #c8c6c4;
     cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Loading spinner for button */
+button#registerButton.loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin: auto;
+    border: 2px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: button-spin 0.8s linear infinite;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+@keyframes button-spin {
+    0% { transform: translateY(-50%) rotate(0deg); }
+    100% { transform: translateY(-50%) rotate(360deg); }
 }
 
 .form-message {
     margin-top: 1rem;
-    padding: 0.75rem;
-    border-radius: 3px;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
     display: none;
+    animation: slideIn 0.3s ease-out;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .form-message.success {
@@ -174,6 +290,15 @@ button#registerButton:disabled {
     background: #dff6dd;
     color: #107c10;
     border: 1px solid #107c10;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-message.success::before {
+    content: '✓';
+    font-size: 1.2rem;
+    font-weight: bold;
 }
 
 .form-message.error {
@@ -181,6 +306,14 @@ button#registerButton:disabled {
     background: #fde7e9;
     color: #d13438;
     border: 1px solid #d13438;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-message.error::before {
+    content: '⚠';
+    font-size: 1.2rem;
 }
 
 /* Global Header Styles */
@@ -293,11 +426,21 @@ button#registerButton:disabled {
         flex-direction: column;
         padding: 1rem;
         min-height: auto;
+        gap: 1rem;
     }
 
     .event-info, .registration-form {
         width: 100%;
         margin-bottom: 1rem;
+        padding: 1.25rem;
+    }
+
+    .event-info {
+        flex: 1;
+    }
+
+    .registration-form {
+        flex: 1;
     }
 
     .header-nav {
@@ -312,6 +455,15 @@ button#registerButton:disabled {
         width: 100%;
     }
 
+    .header-menu li {
+        width: 100%;
+    }
+
+    .header-menu li a {
+        display: block;
+        padding: 0.5rem 0;
+    }
+
     .footer-links {
         grid-template-columns: 1fr;
         gap: 1.5rem;
@@ -320,23 +472,87 @@ button#registerButton:disabled {
     .event-title {
         font-size: 1.25rem;
     }
+
+    .global-header {
+        padding: 0.75rem 1rem;
+    }
+
+    .global-footer {
+        padding: 1.5rem 1rem;
+    }
+
+    button#registerButton {
+        padding: 0.75rem 1.2rem;
+        font-size: 1rem;
+    }
 }
 
 @media (max-width: 480px) {
     .event-hero {
         padding: 0.75rem;
+        gap: 0.75rem;
     }
 
     .event-info, .registration-form {
         padding: 1rem;
     }
 
+    .event-title {
+        font-size: 1.1rem;
+    }
+
+    .registration-form h2 {
+        font-size: 1.1rem;
+    }
+
     .phone-input {
         flex-direction: column;
+        gap: 0.5rem;
     }
 
     .phone-input select {
         max-width: 100%;
+        width: 100%;
+    }
+
+    .phone-input input {
+        width: 100%;
+    }
+
+    .form-group {
+        margin-bottom: 0.875rem;
+    }
+
+    .form-group label {
+        font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group select {
+        font-size: 0.9rem;
+        padding: 0.6rem 0.5rem;
+    }
+
+    button#registerButton {
+        padding: 0.7rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    .form-message {
+        font-size: 0.9rem;
+        padding: 0.625rem 0.875rem;
+    }
+
+    .global-header {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .header-logo a {
+        font-size: 1.1rem;
+    }
+
+    .header-menu li a {
+        font-size: 0.9rem;
     }
 }
 

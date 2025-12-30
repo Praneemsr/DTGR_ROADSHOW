@@ -34,41 +34,107 @@ let dbInitPromise = null;
 // Helper function to download WASM file for serverless environments
 async function downloadWasmFile() {
     const https = require('https');
-    const wasmUrl = 'https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/sql-wasm.wasm';
+    // Try multiple CDNs for better reliability
+    const wasmUrls = [
+        'https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/sql-wasm.wasm',
+        'https://unpkg.com/sql.js@1.12.0/dist/sql-wasm.wasm'
+    ];
     const wasmPath = '/tmp/sql-wasm.wasm';
     
     // Check if already downloaded
     if (fs.existsSync(wasmPath)) {
-        console.log('WASM file already exists');
-        return wasmPath;
+        try {
+            const stats = fs.statSync(wasmPath);
+            if (stats.size > 100000) { // WASM file should be > 100KB
+                console.log('WASM file already exists:', wasmPath, `(${stats.size} bytes)`);
+                return wasmPath;
+            }
+        } catch (err) {
+            console.log('WASM file exists but invalid, re-downloading...');
+        }
     }
     
-    return new Promise((resolve, reject) => {
-        // Set timeout (30 seconds)
-        const timeout = setTimeout(() => {
-            reject(new Error('WASM download timeout after 30 seconds'));
-        }, 30000);
+    // Try each CDN URL
+    for (let i = 0; i < wasmUrls.length; i++) {
+        const wasmUrl = wasmUrls[i];
+        console.log(`Attempting to download WASM from CDN ${i + 1}/${wasmUrls.length}: ${wasmUrl}`);
         
-        const file = fs.createWriteStream(wasmPath);
-        https.get(wasmUrl, { timeout: 25000 }, (response) => {
-            if (response.statusCode === 200) {
-                response.pipe(file);
-                file.on('finish', () => {
-                    clearTimeout(timeout);
-                    file.close();
-                    console.log('WASM file downloaded to:', wasmPath);
-                    resolve(wasmPath);
+        try {
+            const result = await new Promise((resolve, reject) => {
+                // Set timeout (10 seconds per attempt)
+                const timeout = setTimeout(() => {
+                    file.destroy();
+                    request.destroy();
+                    reject(new Error('WASM download timeout after 10 seconds'));
+                }, 10000);
+                
+                const file = fs.createWriteStream(wasmPath);
+                
+                const request = https.get(wasmUrl, { 
+                    timeout: 8000,
+                    headers: {
+                        'User-Agent': 'Node.js/sql.js',
+                        'Accept': '*/*'
+                    }
+                }, (response) => {
+                    if (response.statusCode === 200) {
+                        let downloadedBytes = 0;
+                        response.on('data', (chunk) => {
+                            downloadedBytes += chunk.length;
+                        });
+                        
+                        response.pipe(file);
+                        file.on('finish', () => {
+                            clearTimeout(timeout);
+                            file.close();
+                            // Verify file was written
+                            try {
+                                const stats = fs.statSync(wasmPath);
+                                if (stats.size > 100000) { // WASM should be > 100KB
+                                    console.log(`WASM file downloaded successfully from CDN ${i + 1}:`, wasmPath, `(${stats.size} bytes, downloaded ${downloadedBytes} bytes)`);
+                                    resolve(wasmPath);
+                                } else {
+                                    reject(new Error(`Downloaded WASM file too small: ${stats.size} bytes`));
+                                }
+                            } catch (err) {
+                                reject(new Error('Failed to verify downloaded WASM file: ' + err.message));
+                            }
+                        });
+                    } else {
+                        clearTimeout(timeout);
+                        file.destroy();
+                        reject(new Error(`Failed to download WASM: HTTP ${response.statusCode}`));
+                    }
                 });
-            } else {
-                clearTimeout(timeout);
-                reject(new Error(`Failed to download WASM: ${response.statusCode}`));
+                
+                request.on('error', (err) => {
+                    clearTimeout(timeout);
+                    file.destroy();
+                    fs.unlink(wasmPath, () => {}); // Delete partial file
+                    reject(new Error('WASM download error: ' + err.message));
+                });
+                
+                request.on('timeout', () => {
+                    clearTimeout(timeout);
+                    request.destroy();
+                    file.destroy();
+                    reject(new Error('WASM download request timeout'));
+                });
+            });
+            
+            return result; // Success!
+        } catch (err) {
+            console.error(`CDN ${i + 1} failed:`, err.message);
+            if (i === wasmUrls.length - 1) {
+                // Last CDN failed, throw error
+                throw new Error(`All CDN attempts failed. Last error: ${err.message}`);
             }
-        }).on('error', (err) => {
-            clearTimeout(timeout);
-            fs.unlink(wasmPath, () => {}); // Delete partial file
-            reject(err);
-        });
-    });
+            // Try next CDN
+            continue;
+        }
+    }
+    
+    throw new Error('All WASM download attempts failed');
 }
 
 // Initialize database function
@@ -84,33 +150,81 @@ async function initializeDatabase() {
     dbInitPromise = (async () => {
         try {
             console.log('Starting database initialization...');
+            console.log('Environment:', { VERCEL: !!process.env.VERCEL, NODE_ENV: process.env.NODE_ENV });
             let wasmPath;
             
-            // For Vercel/serverless, download WASM to /tmp
+            // For Vercel/serverless, first try to find WASM in node_modules (might be bundled)
+            // Only download if not found locally
             if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
-                try {
-                    console.log('Downloading WASM file...');
-                    wasmPath = await Promise.race([
-                        downloadWasmFile(),
-                        new Promise((_, reject) => setTimeout(() => reject(new Error('WASM download timeout')), 30000))
-                    ]);
-                    console.log('WASM file ready');
-                } catch (err) {
-                    console.warn('Failed to download WASM from CDN, trying local paths:', err.message);
-                    wasmPath = null;
+                console.log('Vercel/production environment detected - checking for WASM file...');
+                
+                // First, check if WASM exists in node_modules (Vercel might bundle it)
+                const possibleLocalPaths = [
+                    path.join(__dirname, 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm'),
+                    path.join(process.cwd(), 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm'),
+                    '/var/task/node_modules/sql.js/dist/sql-wasm.wasm'
+                ];
+                
+                let foundLocal = false;
+                for (const localPath of possibleLocalPaths) {
+                    try {
+                        if (fs.existsSync(localPath)) {
+                            const stats = fs.statSync(localPath);
+                            if (stats.size > 100000) {
+                                console.log(`Found WASM file in node_modules: ${localPath} (${stats.size} bytes)`);
+                                wasmPath = localPath;
+                                foundLocal = true;
+                                break;
+                            }
+                        }
+                    } catch (err) {
+                        // Continue
+                    }
+                }
+                
+                // If not found locally, download from CDN
+                if (!foundLocal) {
+                    console.log('WASM not found in node_modules, downloading from CDN...');
+                    try {
+                        wasmPath = await downloadWasmFile();
+                        console.log('WASM file downloaded successfully:', wasmPath);
+                        // Verify it exists and is readable
+                        if (!fs.existsSync(wasmPath)) {
+                            throw new Error('Downloaded WASM file does not exist at: ' + wasmPath);
+                        }
+                        const stats = fs.statSync(wasmPath);
+                        if (stats.size === 0) {
+                            throw new Error('Downloaded WASM file is empty');
+                        }
+                        console.log(`WASM file verified: ${stats.size} bytes`);
+                    } catch (err) {
+                        console.error('Failed to download WASM from CDN:', err.message);
+                        console.error('Will try to use node_modules path as fallback');
+                        // wasmPath remains undefined, will try in locateFile
+                    }
                 }
             }
             
-            // Configure sql.js
-            const sqlJsConfig = {
-                locateFile: (file) => {
+            // Create locateFile function that can access wasmPath variable
+            const createLocateFile = (currentWasmPath) => {
+                return (file) => {
                     if (file.endsWith('.wasm')) {
-                        // Use downloaded WASM if available
-                        if (wasmPath && fs.existsSync(wasmPath)) {
-                            return wasmPath;
+                        // Priority 1: Use downloaded WASM if available and valid
+                        if (currentWasmPath) {
+                            try {
+                                if (fs.existsSync(currentWasmPath)) {
+                                    const stats = fs.statSync(currentWasmPath);
+                                    if (stats.size > 0) {
+                                        console.log('Using downloaded WASM file:', currentWasmPath);
+                                        return currentWasmPath;
+                                    }
+                                }
+                            } catch (err) {
+                                console.log('Downloaded WASM file invalid, trying alternatives...');
+                            }
                         }
                         
-                        // Try local paths for development
+                        // Priority 2: Try local paths for development
                         const possiblePaths = [
                             path.join(__dirname, 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm'),
                             path.join(process.cwd(), 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm'),
@@ -118,22 +232,130 @@ async function initializeDatabase() {
                         ];
                         
                         for (const localPath of possiblePaths) {
-                            if (fs.existsSync(localPath)) {
-                                console.log('Found WASM file at:', localPath);
-                                return localPath;
+                            try {
+                                if (fs.existsSync(localPath)) {
+                                    const stats = fs.statSync(localPath);
+                                    if (stats.size > 0) {
+                                        console.log('Found WASM file at:', localPath);
+                                        return localPath;
+                                    }
+                                }
+                            } catch (err) {
+                                // Continue to next path
                             }
                         }
                         
-                        // If all else fails, return the downloaded path (will be created)
-                        return wasmPath || '/tmp/sql-wasm.wasm';
+                        // Priority 3: If on Vercel and no local file, try /tmp again (might have been downloaded)
+                        if (process.env.VERCEL) {
+                            const tmpPath = '/tmp/sql-wasm.wasm';
+                            try {
+                                if (fs.existsSync(tmpPath)) {
+                                    const stats = fs.statSync(tmpPath);
+                                    if (stats.size > 0) {
+                                        console.log('Found WASM in /tmp:', tmpPath);
+                                        return tmpPath;
+                                    }
+                                }
+                            } catch (err) {
+                                // Continue
+                            }
+                        }
+                        
+                        // Last resort: return a path that will fail with a clear error
+                        console.error('WASM file not found in any expected location');
+                        console.error('Tried paths:', possiblePaths);
+                        if (currentWasmPath) {
+                            console.error('Also tried:', currentWasmPath);
+                        }
+                        // Return a non-existent path - sql.js will fail with a clear error
+                        return '/tmp/sql-wasm-not-found.wasm';
                     }
                     return file;
-                }
+                };
             };
             
-            console.log('Initializing sql.js...');
-            SQL = await initSqlJs(sqlJsConfig);
-            console.log('sql.js initialized');
+            // Verify WASM file exists before attempting initialization
+            const verifyWasmFile = (pathToCheck) => {
+                if (!pathToCheck) return false;
+                try {
+                    if (fs.existsSync(pathToCheck)) {
+                        const stats = fs.statSync(pathToCheck);
+                        return stats.size > 0;
+                    }
+                } catch (err) {
+                    return false;
+                }
+                return false;
+            };
+            
+            console.log('Initializing sql.js with config...');
+            let initAttempts = 0;
+            const maxAttempts = 3;
+            
+            while (initAttempts < maxAttempts) {
+                try {
+                    initAttempts++;
+                    console.log(`sql.js initialization attempt ${initAttempts}/${maxAttempts}...`);
+                    
+                    // If first attempt failed and we're on Vercel, try downloading WASM again
+                    if (initAttempts > 1 && (process.env.VERCEL || process.env.NODE_ENV === 'production')) {
+                        console.log('Retrying WASM download...');
+                        try {
+                            wasmPath = await downloadWasmFile();
+                            if (verifyWasmFile(wasmPath)) {
+                                console.log('WASM re-downloaded and verified successfully');
+                            } else {
+                                throw new Error('Downloaded WASM file is invalid');
+                            }
+                        } catch (downloadErr) {
+                            console.error('WASM re-download failed:', downloadErr.message);
+                            // Continue to try with existing paths
+                        }
+                    }
+                    
+                    // On Vercel, ensure we have a valid WASM file before proceeding
+                    if ((process.env.VERCEL || process.env.NODE_ENV === 'production') && !verifyWasmFile(wasmPath)) {
+                        // Try one more download
+                        if (initAttempts === 1) {
+                            console.log('WASM file not verified, attempting download...');
+                            try {
+                                wasmPath = await downloadWasmFile();
+                                if (!verifyWasmFile(wasmPath)) {
+                                    throw new Error('Downloaded WASM file verification failed');
+                                }
+                            } catch (downloadErr) {
+                                console.error('WASM download failed:', downloadErr.message);
+                                // Will try local paths in locateFile
+                            }
+                        }
+                    }
+                    
+                    // Create config with current wasmPath
+                    const sqlJsConfig = {
+                        locateFile: createLocateFile(wasmPath)
+                    };
+                    
+                    SQL = await Promise.race([
+                        initSqlJs(sqlJsConfig),
+                        new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error('sql.js initialization timeout after 15 seconds')), 15000)
+                        )
+                    ]);
+                    console.log('sql.js initialized successfully');
+                    break; // Success, exit loop
+                } catch (err) {
+                    console.error(`sql.js initialization attempt ${initAttempts} failed:`, err.message);
+                    if (initAttempts >= maxAttempts) {
+                        console.error('All sql.js initialization attempts failed');
+                        console.error('Stack:', err.stack);
+                        throw new Error(`Failed to initialize sql.js after ${maxAttempts} attempts: ${err.message}`);
+                    }
+                    // Wait before retry (exponential backoff)
+                    const waitTime = 2000 * initAttempts;
+                    console.log(`Waiting ${waitTime}ms before retry...`);
+                    await new Promise(resolve => setTimeout(resolve, waitTime));
+                }
+            }
             
             // Load existing database or create new one
             let buffer;
@@ -322,14 +544,36 @@ app.get('/api/registrations', checkDbReady, (req, res) => {
 });
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
-    const initStatus = dbReady ? 'ready' : (dbInitPromise ? 'initializing' : 'not_started');
+app.get('/api/health', async (req, res) => {
+    let initStatus = dbReady ? 'ready' : (dbInitPromise ? 'initializing' : 'not_started');
+    let errorMessage = null;
+    
+    // If initializing, wait a bit and check again (but don't block too long)
+    if (dbInitPromise && !dbReady) {
+        try {
+            // Wait up to 2 seconds for initialization (non-blocking check)
+            await Promise.race([
+                dbInitPromise,
+                new Promise((resolve) => setTimeout(() => resolve('timeout'), 2000))
+            ]);
+            // Check status after wait
+            initStatus = dbReady ? 'ready' : 'initializing';
+        } catch (err) {
+            initStatus = 'failed';
+            errorMessage = err.message;
+        }
+    }
+    
     res.json({ 
         status: 'ok', 
         message: 'Server is running',
         database: initStatus,
         hasDb: !!db,
-        hasSQL: !!SQL
+        hasSQL: !!SQL,
+        error: errorMessage,
+        vercel: !!process.env.VERCEL,
+        nodeEnv: process.env.NODE_ENV,
+        note: initStatus === 'initializing' ? 'Database is still initializing. This is normal on cold starts. Try again in a few seconds.' : null
     });
 });
 

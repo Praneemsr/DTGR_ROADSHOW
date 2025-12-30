@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Disable submit button to prevent double submission
         registerButton.disabled = true;
         registerButton.textContent = 'Registering...';
+        registerButton.classList.add('loading');
 
         // Collect form data
         const formData = {
@@ -35,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
             showMessage('Please accept the Privacy Statement to continue.', 'error');
             registerButton.disabled = false;
             registerButton.textContent = 'Register';
+            registerButton.classList.remove('loading');
             return;
         }
 
@@ -83,10 +85,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify(submissionData)
             });
 
-            const result = await response.json();
+            // Handle different response types
+            let result;
+            try {
+                result = await response.json();
+            } catch (e) {
+                // If response is not JSON, create a result object
+                result = {
+                    message: response.statusText || 'Registration failed. Please try again.'
+                };
+            }
 
             if (!response.ok) {
-                throw new Error(result.message || 'Registration failed. Please try again.');
+                // Handle specific error codes
+                if (response.status === 409) {
+                    throw new Error('This email is already registered. Please use a different email address.');
+                } else if (response.status === 400) {
+                    throw new Error(result.message || 'Please check your form and try again.');
+                } else if (response.status === 503) {
+                    throw new Error('Service temporarily unavailable. Please try again in a moment.');
+                } else {
+                    throw new Error(result.message || 'Registration failed. Please try again.');
+                }
             }
 
             console.log('Registration successful:', result);
@@ -96,15 +116,38 @@ document.addEventListener('DOMContentLoaded', function() {
             // Reset form after successful submission
             registerForm.reset();
             
+            // Remove validation classes
+            requiredInputs.forEach(input => {
+                input.classList.remove('valid', 'invalid');
+            });
+            
             // Scroll to message
             formMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            // Optional: Scroll to top of form after a delay
+            setTimeout(() => {
+                registerForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 2000);
 
         } catch (error) {
             console.error('Registration error:', error);
-            showMessage('An error occurred during registration. Please try again later.', 'error');
+            
+            // More specific error messages
+            let errorMessage = 'An error occurred during registration. Please try again later.';
+            
+            if (error.message.includes('fetch') || error.message.includes('network') || error.message.includes('Failed to fetch')) {
+                errorMessage = 'Network error: Please check your internet connection and try again.';
+            } else if (error.message.includes('timeout')) {
+                errorMessage = 'Request timed out. Please try again.';
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
+            showMessage(errorMessage, 'error');
         } finally {
             registerButton.disabled = false;
             registerButton.textContent = 'Register';
+            registerButton.classList.remove('loading');
         }
     });
 
@@ -149,6 +192,7 @@ document.addEventListener('DOMContentLoaded', function() {
         input.addEventListener('invalid', function(e) {
             e.preventDefault();
             input.classList.add('invalid');
+            input.classList.remove('valid');
             
             // Show custom validation message
             if (!input.validity.valid) {
@@ -161,11 +205,33 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         input.addEventListener('input', function() {
+            // Remove invalid class
             input.classList.remove('invalid');
-            if (formMessage.classList.contains('error')) {
+            
+            // Add valid class if field is valid and has value
+            if (input.validity.valid && input.value.trim() !== '') {
+                input.classList.add('valid');
+            } else {
+                input.classList.remove('valid');
+            }
+            
+            // Hide error message if user is typing
+            if (formMessage.classList.contains('error') && input.value.trim() !== '') {
                 formMessage.style.display = 'none';
             }
         });
+        
+        // For select elements
+        if (input.tagName === 'SELECT') {
+            input.addEventListener('change', function() {
+                input.classList.remove('invalid');
+                if (input.validity.valid && input.value !== '') {
+                    input.classList.add('valid');
+                } else {
+                    input.classList.remove('valid');
+                }
+            });
+        }
     });
 });
 
