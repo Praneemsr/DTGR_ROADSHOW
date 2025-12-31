@@ -40,6 +40,7 @@
 /* Main Content Layout: Agenda (Left) and Registration (Right) */
 .main-content {
     display: flex;
+    flex-direction: row;
     gap: 2rem;
     padding: 2rem;
     max-width: 1400px;
@@ -50,6 +51,7 @@
 .agenda-section {
     flex: 1;
     min-width: 0; /* Allows flex item to shrink below content size */
+    order: 1;
 }
 
 .registration-form {
@@ -63,6 +65,7 @@
     max-height: calc(100vh - 120px);
     overflow-y: auto;
     align-self: flex-start;
+    order: 2;
 }
 
 .registration-form h2 {
