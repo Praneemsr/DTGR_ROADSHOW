@@ -37,7 +37,7 @@
     margin: 0;
 }
 
-/* Main Content Layout: Agenda (Left) and Registration (Right) */
+/* Main Content Layout: Register Now (Left) and Registration Form (Right) */
 .main-content {
     display: flex;
     flex-direction: row;
@@ -50,11 +50,15 @@
     width: 100%;
 }
 
-.agenda-section {
+.register-now-section {
     flex: 1 1 50%;
     min-width: 400px;
     max-width: 50%;
     order: 1;
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .registration-form {
@@ -71,6 +75,69 @@
     overflow-y: auto;
     align-self: flex-start;
     order: 2;
+}
+
+/* Register Now Section Styling */
+.register-now-title {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+    color: #1b1b1b;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e1dfdd;
+    font-weight: 600;
+}
+
+.register-intro {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #323130;
+    margin-bottom: 2rem;
+}
+
+.agenda-explore-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1b1b1b;
+    margin-bottom: 1.25rem;
+    margin-top: 2rem;
+}
+
+.agenda-overview {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.agenda-overview li {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #323130;
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.agenda-overview li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #323130;
+    font-size: 1.2rem;
+    line-height: 1.4;
+    font-weight: bold;
+}
+
+.agenda-overview li strong {
+    color: #1b1b1b;
+    font-weight: 600;
+}
+
+/* Detailed Agenda Section (Below main content) */
+.detailed-agenda-section {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    background: #f8f8f8;
 }
 
 .registration-form h2 {
@@ -649,7 +716,7 @@ button#registerButton.loading::after {
         gap: 1.5rem;
     }
 
-    .agenda-section {
+    .register-now-section {
         flex: 1;
         width: 100%;
         min-width: 100%;
