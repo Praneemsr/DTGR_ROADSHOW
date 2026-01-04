@@ -59,7 +59,7 @@
     align-items: flex-start;
     width: 100%;
     background: #f8f8f8;
-    min-height: calc(100vh - 400px);
+    min-height: calc(100vh - 200px);
 }
 
 .register-now-section {
@@ -68,12 +68,17 @@
     order: 1;
     background: #fff;
     padding: 0;
+    position: sticky;
+    top: 100px;
+    align-self: flex-start;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
 }
 
 .registration-form {
     flex: 0 0 380px;
     background: #fff;
-    padding: 0;
+    padding: 1.5rem;
     position: sticky;
     top: 100px;
     max-height: calc(100vh - 120px);
@@ -149,10 +154,6 @@
     margin: 0 auto;
     background: #fff;
     border-top: 1px solid #e1dfdd;
-}
-
-.registration-form {
-    padding: 1.5rem;
 }
 
 .registration-form h2 {
@@ -739,6 +740,9 @@ button#registerButton.loading::after {
         min-width: 100%;
         max-width: 100%;
         padding: 0;
+        position: static;
+        max-height: none;
+        overflow-y: visible;
     }
 
     .registration-form {
