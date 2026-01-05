@@ -2,7 +2,7 @@
 .event-banner {
     background: linear-gradient(135deg, #0078D4 0%, #005EA6 100%);
     color: #fff;
-    padding: 3rem 2rem 2rem;
+    padding: 3rem 0 2rem;
     position: relative;
     overflow: hidden;
 }
@@ -24,6 +24,7 @@
     margin: 0 auto;
     position: relative;
     z-index: 1;
+    padding: 0 2rem;
 }
 
 .event-format {
@@ -102,6 +103,7 @@
 /* Register Now Section Styling - Microsoft Events Style */
 .register-now-section {
     padding: 2rem;
+    box-sizing: border-box;
 }
 
 .register-now-title {
