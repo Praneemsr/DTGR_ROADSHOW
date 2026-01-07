@@ -20,7 +20,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(0, 120, 212, 0.08) 0%, rgba(0, 94, 166, 0.03) 100%);
+    background: rgba(0, 0, 0, 0.2);
     pointer-events: none;
     z-index: 0;
 }
@@ -494,9 +494,13 @@ button#registerButton.loading::after {
 
 .header-logo a {
     text-decoration: none;
-    color: #0078D4;
-    font-size: 1.25rem;
-    font-weight: 600;
+    display: inline-block;
+}
+
+.logo-image {
+    height: 24px;
+    width: auto;
+    display: block;
 }
 
 .header-menu {
