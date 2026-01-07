@@ -7,11 +7,14 @@
     background-repeat: no-repeat;
     background-attachment: scroll;
     color: #fff;
-    padding: 4rem 0 3rem;
+    padding: 2rem 0;
     position: relative;
     overflow: hidden;
-    min-height: 450px;
-    max-height: 600px;
+    height: 300px;
+    min-height: 300px;
+    max-height: 300px;
+    display: flex;
+    align-items: center;
 }
 
 .event-banner::before {
@@ -499,10 +502,8 @@ button#registerButton.loading::after {
 }
 
 .logo-image {
-    height: 24px;
-    width: auto;
-    max-width: 120px;
-    max-height: 24px;
+    width: 216px;
+    height: 46px;
     display: block;
     object-fit: contain;
 }
