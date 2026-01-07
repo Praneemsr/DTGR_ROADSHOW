@@ -1,9 +1,11 @@
 /* Event Banner - Microsoft Events Style */
 .event-banner {
-    background: #000 url("../images/banner-background.jpg") center/cover no-repeat;
+    background-color: #000;
+    background-image: url("../images/banner-background.jpg");
     background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
     color: #fff;
     padding: 3rem 0 2rem;
     position: relative;
@@ -18,7 +20,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(0, 120, 212, 0.1) 0%, rgba(0, 94, 166, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(0, 120, 212, 0.08) 0%, rgba(0, 94, 166, 0.03) 100%);
     pointer-events: none;
     z-index: 0;
 }
