@@ -500,7 +500,10 @@ button#registerButton.loading::after {
 .logo-image {
     height: 24px;
     width: auto;
+    max-width: 120px;
+    max-height: 24px;
     display: block;
+    object-fit: contain;
 }
 
 .header-menu {
