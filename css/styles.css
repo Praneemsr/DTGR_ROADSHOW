@@ -1,18 +1,15 @@
 /* Event Banner - Microsoft Events Style */
 .event-banner {
-    background-color: #000;
+    background-color: #0078D4;
     background-image: url("../images/banner-background.jpg");
     background-size: cover;
-    background-position: center top;
+    background-position: center center;
     background-repeat: no-repeat;
-    background-attachment: scroll;
-    color: #fff;
-    padding: 2rem 0;
+    color: #1b1b1b;
+    padding: 3rem 0 2rem;
     position: relative;
     overflow: hidden;
-    height: 300px;
-    min-height: 300px;
-    max-height: 300px;
+    min-height: 400px;
     display: flex;
     align-items: center;
 }
@@ -24,7 +21,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.2);
+    background: linear-gradient(180deg, rgba(0, 120, 212, 0.3) 0%, rgba(155, 89, 182, 0.2) 50%, rgba(227, 242, 253, 0.1) 100%);
     pointer-events: none;
     z-index: 0;
 }
@@ -42,10 +39,10 @@
     font-size: 0.875rem;
     font-weight: 600;
     padding: 0.25rem 0.75rem;
-    background: rgba(255, 255, 255, 0.2);
+    background: #f3f2f1;
     border-radius: 4px;
     margin-bottom: 1rem;
-    color: #fff;
+    color: #323130;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -56,18 +53,18 @@
     gap: 2rem;
     margin: 1.5rem 0;
     padding: 1.5rem 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 1px solid rgba(27, 27, 27, 0.1);
+    border-bottom: 1px solid rgba(27, 27, 27, 0.1);
 }
 
 .banner-details p {
     margin: 0;
     font-size: 0.95rem;
-    color: #fff;
+    color: #323130;
 }
 
 .banner-details strong {
-    color: #fff;
+    color: #1b1b1b;
     font-weight: 600;
     margin-right: 0.5rem;
 }
@@ -221,7 +218,7 @@ body {
 }
 
 .event-banner .event-title {
-    color: #fff;
+    color: #1b1b1b;
     font-size: 2.5rem;
     font-weight: 600;
     line-height: 1.2;
@@ -229,14 +226,14 @@ body {
 }
 
 .event-banner .event-subtitle {
-    color: rgba(255, 255, 255, 0.9);
+    color: #323130;
     font-size: 1.25rem;
     font-weight: 400;
     margin: 0 0 1rem 0;
 }
 
 .event-banner .event-description {
-    color: #fff;
+    color: #323130;
     margin-top: 1.5rem;
     line-height: 1.6;
 }
@@ -244,7 +241,7 @@ body {
 .event-banner .event-location,
 .event-banner .event-datetime,
 .event-banner .event-audience {
-    color: #fff;
+    color: #323130;
 }
 
 .event-description {
