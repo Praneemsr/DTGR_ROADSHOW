@@ -1,6 +1,6 @@
 /* Event Banner - Microsoft Events Style */
 .event-banner {
-    background: linear-gradient(135deg, #0078D4 0%, #005EA6 100%);
+    background: #000 url("../images/banner-background.jpg") center/cover no-repeat;
     color: #fff;
     padding: 3rem 0 2rem;
     position: relative;
@@ -14,8 +14,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: url("../images/event-banner.jpg") center/cover no-repeat;
-    opacity: 0.15;
+    background: linear-gradient(135deg, rgba(0, 120, 212, 0.3) 0%, rgba(0, 94, 166, 0.2) 100%);
     pointer-events: none;
 }
 
