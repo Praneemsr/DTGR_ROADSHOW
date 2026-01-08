@@ -173,7 +173,6 @@
     max-width: 1200px;
     margin: 0 auto;
     background: #fff;
-    border-top: 1px solid #e1dfdd;
 }
 
 .registration-form h2 {
@@ -235,10 +234,14 @@ body {
 
 .event-banner .event-host {
     color: #fff;
-    font-size: 1rem;
+    font-size: 1.25rem;
     font-weight: 700;
     margin: 0 0 1.5rem 0;
     opacity: 0.9;
+}
+
+.event-banner .event-host .hosted-by {
+    font-style: italic;
 }
 
 .event-banner .event-description {
