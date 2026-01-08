@@ -232,6 +232,14 @@ body {
     margin: 0 0 1rem 0;
 }
 
+.event-banner .event-host {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 400;
+    margin: 0 0 1.5rem 0;
+    opacity: 0.9;
+}
+
 .event-banner .event-description {
     color: #fff;
     margin-top: 1.5rem;
@@ -859,6 +867,14 @@ button#registerButton.loading::after {
 
     .event-banner .event-title {
         font-size: 1.5rem;
+    }
+
+    .event-banner .event-subtitle {
+        font-size: 1rem;
+    }
+
+    .event-banner .event-host {
+        font-size: 0.875rem;
     }
 
     .main-content {
