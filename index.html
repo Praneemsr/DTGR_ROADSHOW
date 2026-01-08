@@ -68,6 +68,7 @@
 
             <!-- Right column: Registration form -->
             <div class="registration-form">
+                <h2>Register Now</h2>
                 <form id="registerForm">
                     <div class="form-group">
                         <label for="firstName">First Name <span class="required">*</span></label>
@@ -80,63 +81,88 @@
                         <span id="lastName-desc" class="sr-only">Enter your last name</span>
                     </div>
                     <div class="form-group">
-                        <label for="email">Email Address <span class="required">*</span></label>
+                        <label for="jobTitle">Job Title <span class="required">*</span></label>
+                        <input id="jobTitle" name="jobTitle" type="text" required aria-required="true" placeholder="e.g. IT Administrator">
+                    </div>
+                    <div class="form-group">
+                        <label for="organization">Organization <span class="required">*</span></label>
+                        <input id="organization" name="organization" type="text" required aria-required="true">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Business Email <span class="required">*</span></label>
                         <input id="email" name="email" type="email" required aria-required="true" aria-describedby="email-desc">
-                        <span id="email-desc" class="sr-only">Enter a valid email address</span>
+                        <span id="email-desc" class="sr-only">Enter a valid business email address</span>
                     </div>
                     <div class="form-group">
-                        <label for="phone">Phone Number <span class="required">*</span></label>
-                        <div class="phone-input">
-                            <!-- Country code dropdown -->
-                            <select name="phoneCountry" id="phoneCountry" required>
-                                <option value="+1">+1 (US)</option>
-                                <option value="+44">+44 (UK)</option>
-                                <option value="+65">+65 (SG)</option>
-                                <option value="+61">+61 (AU)</option>
-                                <option value="+91">+91 (IN)</option>
-                                <option value="+86">+86 (CN)</option>
-                                <option value="+81">+81 (JP)</option>
-                                <option value="+49">+49 (DE)</option>
-                                <option value="+33">+33 (FR)</option>
-                                <option value="+39">+39 (IT)</option>
-                            </select>
-                            <input id="phoneNumber" name="phoneNumber" type="tel" required placeholder="Phone Number">
-                        </div>
+                        <label for="phone">Phone Number <span class="optional">(Optional)</span></label>
+                        <input id="phone" name="phone" type="tel" placeholder="Phone Number">
                     </div>
                     <div class="form-group">
-                        <label for="jobRole">Job Role</label>
-                        <input id="jobRole" name="jobRole" type="text" placeholder="e.g. IT Administrator">
-                    </div>
-                    <div class="form-group">
-                        <label for="company">Company Name</label>
-                        <input id="company" name="company" type="text" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="country">Country/Region</label>
-                        <select id="country" name="country" required>
+                        <label for="country">Country <span class="required">*</span></label>
+                        <select id="country" name="country" required aria-required="true">
                             <option value="">-- Select Country --</option>
                             <option value="US">United States</option>
                             <option value="CA">Canada</option>
-                            <option value="SG">Singapore</option>
-                            <option value="AU">Australia</option>
-                            <option value="IN">India</option>
                             <option value="GB">United Kingdom</option>
-                            <option value="DE">Germany</option>
                             <option value="FR">France</option>
+                            <option value="DE">Germany</option>
                             <option value="IT">Italy</option>
-                            <option value="JP">Japan</option>
-                            <option value="CN">China</option>
-                            <option value="BR">Brazil</option>
-                            <option value="MX">Mexico</option>
                             <option value="ES">Spain</option>
                             <option value="NL">Netherlands</option>
+                            <option value="BE">Belgium</option>
                             <option value="SE">Sweden</option>
                             <option value="NO">Norway</option>
                             <option value="DK">Denmark</option>
                             <option value="FI">Finland</option>
                             <option value="PL">Poland</option>
-                            <option value="BE">Belgium</option>
+                            <option value="SG">Singapore</option>
+                            <option value="AU">Australia</option>
+                            <option value="IN">India</option>
+                            <option value="JP">Japan</option>
+                            <option value="CN">China</option>
+                            <option value="BR">Brazil</option>
+                            <option value="MX">Mexico</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="industry">Industry <span class="required">*</span></label>
+                        <select id="industry" name="industry" required aria-required="true">
+                            <option value="">-- Select Industry --</option>
+                            <option value="Financial Services">Financial Services</option>
+                            <option value="Public Sector">Public Sector</option>
+                            <option value="Healthcare & Life Sciences">Healthcare & Life Sciences</option>
+                            <option value="Manufacturing">Manufacturing</option>
+                            <option value="Retail/Consumer Goods">Retail/Consumer Goods</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="keyPriorities">Key Priorities <span class="required">*</span></label>
+                        <select id="keyPriorities" name="keyPriorities" multiple required aria-required="true" size="5" style="height: auto;">
+                            <option value="EU AI Act Governance">EU AI Act Governance</option>
+                            <option value="NIS2 Readiness">NIS2 Readiness</option>
+                            <option value="DORA Operational Resilience">DORA Operational Resilience</option>
+                            <option value="GDPR Compliance">GDPR Compliance</option>
+                            <option value="Data Sovereignty & EU Data Boundary">Data Sovereignty & EU Data Boundary</option>
+                            <option value="Identity Modernization">Identity Modernization</option>
+                            <option value="SOC & XDR Transformation">SOC & XDR Transformation</option>
+                            <option value="Purview & Compliance Management">Purview & Compliance Management</option>
+                            <option value="AI Assurance">AI Assurance</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <small style="display: block; margin-top: 0.5rem; color: #605e5c; font-size: 0.875rem;">Hold Ctrl (Windows) or Cmd (Mac) to select multiple options</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="dietaryRestrictions">Dietary Restrictions <span class="optional">(Optional)</span></label>
+                        <input id="dietaryRestrictions" name="dietaryRestrictions" type="text" placeholder="e.g. Vegetarian, Gluten-free">
+                    </div>
+                    <div class="form-group">
+                        <label for="accessibilityRequirements">Accessibility Requirements <span class="optional">(Optional)</span></label>
+                        <input id="accessibilityRequirements" name="accessibilityRequirements" type="text" placeholder="Please specify any accessibility needs">
+                    </div>
+                    <div class="form-group">
+                        <label for="additionalComments">Additional Comments or Reason for Attending <span class="optional">(Optional)</span></label>
+                        <textarea id="additionalComments" name="additionalComments" rows="4" placeholder="Tell us why you're interested in attending"></textarea>
                     </div>
                     <!-- Privacy consent and submit -->
                     <div class="form-group checkbox-group">

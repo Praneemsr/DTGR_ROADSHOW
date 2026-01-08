@@ -65,7 +65,8 @@
 
 .banner-details strong {
     color: #fff;
-    font-weight: 600;
+    font-weight: 700;
+    font-style: italic;
     margin-right: 0.5rem;
 }
 
@@ -220,7 +221,7 @@ body {
 .event-banner .event-title {
     color: #fff;
     font-size: 2.5rem;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.2;
     margin: 0.5rem 0 1rem 0;
 }
@@ -228,14 +229,14 @@ body {
 .event-banner .event-subtitle {
     color: #fff;
     font-size: 1.25rem;
-    font-weight: 400;
+    font-weight: 700;
     margin: 0 0 1rem 0;
 }
 
 .event-banner .event-host {
     color: #fff;
     font-size: 1rem;
-    font-weight: 400;
+    font-weight: 700;
     margin: 0 0 1.5rem 0;
     opacity: 0.9;
 }
@@ -281,6 +282,12 @@ body {
     font-weight: bold;
 }
 
+.optional {
+    color: #605e5c;
+    font-weight: normal;
+    font-size: 0.9em;
+}
+
 .sr-only {
     position: absolute;
     width: 1px;
@@ -294,7 +301,8 @@ body {
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+.form-group textarea {
     width: 100%;
     padding: 0.625rem 0.75rem;
     font: inherit;
@@ -307,7 +315,8 @@ body {
 }
 
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form-group textarea:focus {
     outline: none;
     border-color: #0078D4;
     box-shadow: 0 0 0 1px #0078D4;
@@ -315,12 +324,14 @@ body {
 }
 
 .form-group input:hover,
-.form-group select:hover {
+.form-group select:hover,
+.form-group textarea:hover {
     border-color: #323130;
 }
 
 .form-group input.invalid,
-.form-group select.invalid {
+.form-group select.invalid,
+.form-group textarea.invalid {
     border-color: #d13438;
     box-shadow: 0 0 0 2px rgba(209, 52, 56, 0.2);
 }
@@ -342,6 +353,22 @@ body {
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     background-size: 16px 16px;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+.form-group select[multiple] {
+    min-height: 120px;
+    padding: 0.5rem;
+}
+
+.form-group select[multiple] option {
+    padding: 0.5rem;
+    margin: 0.25rem 0;
 }
 
 .phone-input {
@@ -938,7 +965,8 @@ button#registerButton.loading::after {
     }
 
     .form-group input,
-    .form-group select {
+    .form-group select,
+    .form-group textarea {
         font-size: 0.9rem;
         padding: 0.6rem 0.5rem;
     }
