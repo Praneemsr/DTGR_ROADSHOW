@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
             phone: document.getElementById('phone')?.value.trim() || '',
             country: document.getElementById('country').value,
             industry: document.getElementById('industry')?.value || '',
-            keyPriorities: Array.from(keyPrioritiesSelect?.selectedOptions || []).map(option => option.value),
+            keyPriorities: Array.from(keyPrioritiesSelect?.selectedOptions || []).filter(option => option.value !== '').map(option => option.value),
             dietaryRestrictions: document.getElementById('dietaryRestrictions')?.value.trim() || '',
             accessibilityRequirements: document.getElementById('accessibilityRequirements')?.value.trim() || '',
             additionalComments: document.getElementById('additionalComments')?.value.trim() || '',
@@ -190,16 +190,36 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Key Priorities multi-select validation
+    // Key Priorities multi-select validation and dropdown behavior
     const keyPrioritiesSelect = document.getElementById('keyPriorities');
     const keyPrioritiesError = document.getElementById('keyPrioritiesError');
 
     if (keyPrioritiesSelect) {
+        // Remove placeholder option when real options are selected
         keyPrioritiesSelect.addEventListener('change', function() {
-            const selected = Array.from(keyPrioritiesSelect.selectedOptions || []);
+            const selected = Array.from(this.selectedOptions || []).filter(opt => opt.value !== '');
             if (selected.length > 0) {
                 keyPrioritiesError.style.display = 'none';
-                keyPrioritiesSelect.classList.remove('invalid');
+                this.classList.remove('invalid');
+                // Remove placeholder from selection if other options are selected
+                const placeholderOption = this.querySelector('option[value=""]');
+                if (placeholderOption && placeholderOption.selected && selected.length > 0) {
+                    placeholderOption.selected = false;
+                }
+            }
+        });
+
+        // Handle dropdown expansion on focus
+        keyPrioritiesSelect.addEventListener('focus', function() {
+            this.style.maxHeight = '200px';
+            this.style.overflowY = 'auto';
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (keyPrioritiesSelect && !keyPrioritiesSelect.contains(e.target) && document.activeElement !== keyPrioritiesSelect) {
+                keyPrioritiesSelect.style.maxHeight = '2.5rem';
+                keyPrioritiesSelect.style.overflowY = 'hidden';
             }
         });
     }
