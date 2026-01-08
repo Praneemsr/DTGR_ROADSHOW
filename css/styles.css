@@ -175,6 +175,55 @@
     background: #fff;
 }
 
+.agenda-table-wrapper {
+    max-height: 520px;
+    overflow-y: auto;
+    border: 1px solid #e1dfdd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.agenda-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.agenda-table thead {
+    position: sticky;
+    top: 0;
+    background: #f3f2f1;
+    z-index: 1;
+}
+
+.agenda-table th,
+.agenda-table td {
+    padding: 1rem;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid #e1dfdd;
+}
+
+.agenda-table th {
+    font-weight: 700;
+    color: #1b1b1b;
+    border-bottom: 2px solid #c8c6c4;
+}
+
+.agenda-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.agenda-table ul {
+    margin: 0.5rem 0 0;
+    padding-left: 1.25rem;
+}
+
+.agenda-table ul li {
+    margin: 0.25rem 0;
+    line-height: 1.4;
+}
+
 .registration-form h2 {
     font-size: 1.25rem;
     margin-bottom: 1.5rem;
