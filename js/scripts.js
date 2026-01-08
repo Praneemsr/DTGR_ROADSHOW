@@ -22,14 +22,31 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = {
             firstName: document.getElementById('firstName').value.trim(),
             lastName: document.getElementById('lastName').value.trim(),
+            jobTitle: document.getElementById('jobTitle')?.value.trim() || '',
+            organization: document.getElementById('organization')?.value.trim() || '',
             email: document.getElementById('email').value.trim(),
-            phoneCountry: document.getElementById('phoneCountry').value,
-            phoneNumber: document.getElementById('phoneNumber').value.trim(),
-            jobRole: document.getElementById('jobRole').value.trim(),
-            company: document.getElementById('company').value.trim(),
+            phone: document.getElementById('phone')?.value.trim() || '',
             country: document.getElementById('country').value,
+            industry: document.getElementById('industry')?.value || '',
+            keyPriorities: Array.from(document.querySelectorAll('input[name="keyPriorities"]:checked')).map(cb => cb.value),
+            dietaryRestrictions: document.getElementById('dietaryRestrictions')?.value.trim() || '',
+            accessibilityRequirements: document.getElementById('accessibilityRequirements')?.value.trim() || '',
+            additionalComments: document.getElementById('additionalComments')?.value.trim() || '',
             acceptTerms: document.getElementById('acceptTerms').checked
         };
+
+        // Validate Key Priorities
+        const keyPrioritiesError = document.getElementById('keyPrioritiesError');
+        if (formData.keyPriorities.length === 0) {
+            keyPrioritiesError.style.display = 'block';
+            showMessage('Please select at least one Key Priority.', 'error');
+            registerButton.disabled = false;
+            registerButton.textContent = 'Register';
+            registerButton.classList.remove('loading');
+            return;
+        } else {
+            keyPrioritiesError.style.display = 'none';
+        }
 
         // Validate form data
         if (!formData.acceptTerms) {
@@ -40,18 +57,20 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Combine phone country code and number
-        const fullPhoneNumber = `${formData.phoneCountry} ${formData.phoneNumber}`;
-
         // Prepare data for submission (matching expected field names)
         const submissionData = {
             me_firstname: formData.firstName,
             me_lastname: formData.lastName,
             me_email: formData.email,
-            me_phonenumber: fullPhoneNumber,
-            me_companyname: formData.company,
+            me_phonenumber: formData.phone,
+            me_companyname: formData.organization,
             me_country: formData.country,
-            jobRole: formData.jobRole
+            jobTitle: formData.jobTitle,
+            industry: formData.industry,
+            keyPriorities: formData.keyPriorities.join(', '),
+            dietaryRestrictions: formData.dietaryRestrictions,
+            accessibilityRequirements: formData.accessibilityRequirements,
+            additionalComments: formData.additionalComments
         };
 
         try {
@@ -159,18 +178,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Phone number formatting (optional enhancement)
-    const phoneNumberInput = document.getElementById('phoneNumber');
-    phoneNumberInput.addEventListener('input', function(e) {
-        // Remove any non-digit characters except spaces and dashes
-        let value = e.target.value.replace(/[^\d\s\-]/g, '');
-        e.target.value = value;
-    });
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            // Remove any non-digit characters except spaces and dashes
+            let value = e.target.value.replace(/[^\d\s\-]/g, '');
+            e.target.value = value;
+        });
+    }
 
-    // Auto-format phone number based on country selection (optional)
-    const phoneCountrySelect = document.getElementById('phoneCountry');
-    phoneCountrySelect.addEventListener('change', function() {
-        // You could add country-specific formatting here
-        // For example, US numbers: (XXX) XXX-XXXX
+    // Key Priorities checkbox validation
+    const keyPrioritiesCheckboxes = document.querySelectorAll('input[name="keyPriorities"]');
+    const keyPrioritiesError = document.getElementById('keyPrioritiesError');
+    
+    keyPrioritiesCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const checkedCount = document.querySelectorAll('input[name="keyPriorities"]:checked').length;
+            if (checkedCount > 0) {
+                keyPrioritiesError.style.display = 'none';
+            }
+        });
     });
 
     // Email validation enhancement

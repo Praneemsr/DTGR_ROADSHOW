@@ -137,20 +137,50 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="keyPriorities">Key Priorities <span class="required">*</span></label>
-                        <select id="keyPriorities" name="keyPriorities" multiple required aria-required="true" size="5">
-                            <option value="EU AI Act Governance">EU AI Act Governance</option>
-                            <option value="NIS2 Readiness">NIS2 Readiness</option>
-                            <option value="DORA Operational Resilience">DORA Operational Resilience</option>
-                            <option value="GDPR Compliance">GDPR Compliance</option>
-                            <option value="Data Sovereignty & EU Data Boundary">Data Sovereignty & EU Data Boundary</option>
-                            <option value="Identity Modernization">Identity Modernization</option>
-                            <option value="SOC & XDR Transformation">SOC & XDR Transformation</option>
-                            <option value="Purview & Compliance Management">Purview & Compliance Management</option>
-                            <option value="AI Assurance">AI Assurance</option>
-                            <option value="Other">Other</option>
-                        </select>
-                        <small style="display: block; margin-top: 0.5rem; color: #605e5c; font-size: 0.875rem;">Hold Ctrl (Windows) or Cmd (Mac) to select multiple options</small>
+                        <label>Key Priorities <span class="required">*</span></label>
+                        <div class="checkbox-group" id="keyPrioritiesGroup" role="group" aria-required="true">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="priority1" name="keyPriorities" value="EU AI Act Governance">
+                                <label for="priority1">EU AI Act Governance</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="priority2" name="keyPriorities" value="NIS2 Readiness">
+                                <label for="priority2">NIS2 Readiness</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="priority3" name="keyPriorities" value="DORA Operational Resilience">
+                                <label for="priority3">DORA Operational Resilience</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="priority4" name="keyPriorities" value="GDPR Compliance">
+                                <label for="priority4">GDPR Compliance</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="priority5" name="keyPriorities" value="Data Sovereignty & EU Data Boundary">
+                                <label for="priority5">Data Sovereignty & EU Data Boundary</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="priority6" name="keyPriorities" value="Identity Modernization">
+                                <label for="priority6">Identity Modernization</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="priority7" name="keyPriorities" value="SOC & XDR Transformation">
+                                <label for="priority7">SOC & XDR Transformation</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="priority8" name="keyPriorities" value="Purview & Compliance Management">
+                                <label for="priority8">Purview & Compliance Management</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="priority9" name="keyPriorities" value="AI Assurance">
+                                <label for="priority9">AI Assurance</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="priority10" name="keyPriorities" value="Other">
+                                <label for="priority10">Other</label>
+                            </div>
+                        </div>
+                        <small id="keyPrioritiesError" class="error-message" style="display: none; color: #d13438; margin-top: 0.5rem;">Please select at least one priority</small>
                     </div>
                     <div class="form-group">
                         <label for="dietaryRestrictions">Dietary Restrictions <span class="optional">(Optional)</span></label>
