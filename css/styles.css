@@ -175,6 +175,10 @@
     background: #fff;
 }
 
+.detailed-agenda-section .agenda-title {
+    margin-bottom: 1.5rem;
+}
+
 .agenda-table {
     width: 100%;
     border-collapse: collapse;
@@ -698,10 +702,8 @@ button#registerButton.loading::after {
 
 /* Agenda Section Styles - Redesigned */
 .agenda-container {
-    background: #fff;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: transparent;
+    padding: 0;
     height: 100%;
 }
 
