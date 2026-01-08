@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
         registerButton.classList.add('loading');
 
         // Collect form data
+        const keyPrioritiesSelect = document.getElementById('keyPriorities');
         const formData = {
             firstName: document.getElementById('firstName').value.trim(),
             lastName: document.getElementById('lastName').value.trim(),
@@ -28,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
             phone: document.getElementById('phone')?.value.trim() || '',
             country: document.getElementById('country').value,
             industry: document.getElementById('industry')?.value || '',
-            keyPriorities: Array.from(document.querySelectorAll('input[name="keyPriorities"]:checked')).map(cb => cb.value),
+            keyPriorities: Array.from(keyPrioritiesSelect?.selectedOptions || []).map(option => option.value),
             dietaryRestrictions: document.getElementById('dietaryRestrictions')?.value.trim() || '',
             accessibilityRequirements: document.getElementById('accessibilityRequirements')?.value.trim() || '',
             additionalComments: document.getElementById('additionalComments')?.value.trim() || '',
@@ -39,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const keyPrioritiesError = document.getElementById('keyPrioritiesError');
         if (formData.keyPriorities.length === 0) {
             keyPrioritiesError.style.display = 'block';
+            keyPrioritiesSelect?.classList.add('invalid');
             showMessage('Please select at least one Key Priority.', 'error');
             registerButton.disabled = false;
             registerButton.textContent = 'Register';
@@ -46,6 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         } else {
             keyPrioritiesError.style.display = 'none';
+            keyPrioritiesSelect?.classList.remove('invalid');
         }
 
         // Validate form data
@@ -187,18 +190,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Key Priorities checkbox validation
-    const keyPrioritiesCheckboxes = document.querySelectorAll('input[name="keyPriorities"]');
+    // Key Priorities multi-select validation
+    const keyPrioritiesSelect = document.getElementById('keyPriorities');
     const keyPrioritiesError = document.getElementById('keyPrioritiesError');
-    
-    keyPrioritiesCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const checkedCount = document.querySelectorAll('input[name="keyPriorities"]:checked').length;
-            if (checkedCount > 0) {
+
+    if (keyPrioritiesSelect) {
+        keyPrioritiesSelect.addEventListener('change', function() {
+            const selected = Array.from(keyPrioritiesSelect.selectedOptions || []);
+            if (selected.length > 0) {
                 keyPrioritiesError.style.display = 'none';
+                keyPrioritiesSelect.classList.remove('invalid');
             }
         });
-    });
+    }
 
     // Email validation enhancement
     const emailInput = document.getElementById('email');

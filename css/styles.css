@@ -473,18 +473,6 @@ body {
     line-height: 1.5;
 }
 
-#keyPrioritiesGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    border: 1px solid #e1dfdd;
-    border-radius: 2px;
-    padding: 1rem;
-    background: #faf9f8;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
 button#registerButton {
     background: #0078D4;
     color: #fff;
